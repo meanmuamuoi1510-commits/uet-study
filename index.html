@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MechaStudy - Học Tập Cơ Điện Tử (Chặng 1)</title>
+  <style>
+    :root {
+      --bg-main: #f8fafc;
+      --bg-panel: #ffffff;
+      --bg-sidebar: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --warning: #d97706;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --radius: 8px;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0f172a;
+      --bg-panel: #1e293b;
+      --bg-sidebar: #162032;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Thanh Header & Trạng thái */
+    header {
+      height: 56px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .status-pill {
+      font-size: 0.82rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+    .dot.ok { background: var(--success); }
+    .dot.busy { background: var(--warning); animation: pulse 1s infinite; }
+    .dot.err { background: var(--danger); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* Bố cục thân trang */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    aside#sidebar {
+      width: 260px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    main#main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Nút bấm & Input */
+    button {
+      cursor: pointer;
+      padding: 7px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover { border-color: var(--primary); }
+    button.btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    button.btn-primary:hover { background: var(--primary-hover); }
+    button.btn-danger {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+    button.btn-sm { padding: 4px 8px; font-size: 0.78rem; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .secret-wrap {
+      display: flex;
+      gap: 6px;
+    }
+    .secret-wrap input { flex: 1; }
+
+    /* Thẻ & Hộp thoại */
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+    .card h2 { font-size: 1.15rem; margin-bottom: 8px; }
+    .card p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; }
+
+    /* Modal Cài đặt */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+    }
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+    }
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 14px 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .log-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border);
+      font-family: monospace;
+      font-size: 0.82rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .mobile-menu-btn { display: none; }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: inline-block; }
+      aside#sidebar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        transform: translateX(-100%);
+        box-shadow: var(--shadow);
+      }
+      aside#sidebar.open { transform: translateX(0); }
+      .header-right .status-pill span.hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Thanh tiêu đề & trạng thái -->
+  <header>
+    <div class="header-left">
+      <button class="mobile-menu-btn" id="btn-toggle-sidebar" title="Mở/Đóng thư viện">☰</button>
+      <span class="brand">⚙️ MechaStudy</span>
+    </div>
+    <div class="header-right">
+      <!-- Trạng thái chờ hạn mức / Rate limit -->
+      <div class="status-pill" id="rl-wait-banner" style="display:none; color:var(--warning); border-color:var(--warning);">
+        ⏳ <span id="rl-wait-text">Đang chờ hạn mức...</span>
+      </div>
+
+      <!-- Bộ đếm lượt AI trong ngày -->
+      <div class="status-pill" title="Bộ đếm lượt gọi AI ước tính trong ngày">
+        🤖 <span class="hide-sm">Hôm nay đã dùng</span> <strong id="ai-quota-text">0/100</strong> <span class="hide-sm">lượt AI</span>
+        <button class="btn-sm" id="btn-reset-quota" title="Đặt lại bộ đếm hôm nay">↺</button>
+      </div>
+
+      <!-- Chỉ báo đồng bộ GitHub -->
+      <div class="status-pill" id="sync-indicator" title="Trạng thái đồng bộ GitHub">
+        <span class="dot" id="sync-dot"></span>
+        <span id="sync-text">Đã kết nối</span>
+      </div>
+
+      <button id="btn-theme" title="Đổi giao diện Sáng/Tối">🌓</button>
+      <button class="btn-primary" id="btn-open-settings">⚙ Cài đặt</button>
+    </div>
+  </header>
+
+  <!-- Thân ứng dụng -->
+  <div class="app-body">
+    <aside id="sidebar">
+      <div>
+        <div style="font-size:2rem; margin-bottom:8px;">📚</div>
+        <div><strong>Thư viện (sẽ làm ở chặng 3)</strong></div>
+      </div>
+    </aside>
+
+    <main id="main-content">
+      <div class="card">
+        <h2>Khung Nền Tảng - Chặng 1 Đã Sẵn Sàng</h2>
+        <p>Hệ thống lõi dành cho sinh viên Cơ điện tử (Cơ học, Vật lý) đã được khởi tạo. Các module đã nạp vào bộ nhớ:</p>
+        <ul style="margin: 10px 0 10px 20px; font-size:0.9rem; line-height:1.6;">
+          <li><strong>Cấu hình & Bảo mật:</strong> Lưu trữ độc lập trong <code>localStorage</code>, tự động escape dữ liệu đầu ra.</li>
+          <li><strong>Adapter Đa Mô Hình (`callLLM`):</strong> Hỗ trợ Google Gemini, Anthropic Claude, OpenAI và OpenAI-Compatible.</li>
+          <li><strong>Điều tiết lượt gọi (Rate Limiter):</strong> Hàng đợi cửa sổ trượt 60 giây, tự động thử lại khi gặp lỗi 429 hoặc JSON bị hỏng.</li>
+          <li><strong>Lưu trữ GitHub REST API & IndexedDB Cache:</strong> Xử lý UTF-8 tiếng Việt hoàn chỉnh, phát hiện xung đột SHA.</li>
+        </ul>
+        <p id="idb-warning" style="color:var(--danger); font-weight:600; display:none;"></p>
+      </div>
+
+      <!-- Khu vực thử nghiệm nhanh Chặng 1 -->
+      <div class="card">
+        <h2>Bảng Kiểm Tra Nhanh Hạ Tầng (Chặng 1)</h2>
+        <p style="margin-bottom:12px;">Sử dụng hộp <strong>⚙ Cài đặt</strong> ở góc phải trên để nhập API Key / GitHub Token và kiểm tra kết nối trực tiếp, hoặc thử nghiệm nhanh hợp đồng đường dẫn dưới đây:</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày học (YYYY-MM-DD)</label>
+            <input type="text" id="test-date" value="2026-10-22">
+          </div>
+          <div class="form-group">
+            <label>Mã băm phiên (hash8)</label>
+            <input type="text" id="test-hash" value="a1b2c3d4">
+          </div>
+        </div>
+        <button id="btn-test-paths">Tạo đường dẫn mẫu (buildPaths)</button>
+        <div class="log-box" id="main-log-box">Sẵn sàng. Hãy mở Cài đặt để cấu hình API Key và GitHub Token.</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hộp thoại Cài đặt -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>⚙ Cài đặt Hệ thống (Chỉ lưu trên trình duyệt này)</span>
+        <button class="btn-sm" id="btn-close-settings">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 1. Nhà cung cấp AI -->
+        <div class="section-title">1. Nhà cung cấp AI & Mô hình</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cfg-provider">Hãng AI đang dùng</label>
+            <select id="cfg-provider">
+              <option value="gemini">Google Gemini (Mặc định)</option>
+              <option value="claude">Anthropic Claude</option>
+              <option value="openai">OpenAI</option>
+              <option value="compat">OpenAI-tương-thích (Custom Base URL)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cfg-reasoning">Mức suy luận (Trống = mặc định model)</label>
+            <input type="text" id="cfg-reasoning" placeholder="Gemini 3.x: low (nhanh), medium, high; hoặc để trống">
+          </div>
+        </div>
+
+        <div class="form-group" id="cfg-baseurl-wrap" style="display:none;">
+          <label for="cfg-baseurl">Base URL (Dành cho OpenAI-tương-thích)</label>
+          <input type="text" id="cfg-baseurl" placeholder="https://api.openai.com">
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-apikey">API Key của hãng đang chọn</label>
+          <div class="secret-wrap">
+            <input type="password" id="cfg-apikey" placeholder="Nhập API Key..." autocomplete="off">
+            <button type="button" class="btn-toggle-secret" data-target="cfg-apikey">Hiện</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cfg-model-quet">Model vai trò "quet"</label>
+            <input type="text" id="cfg-model-quet" placeholder="gemini-3.8-flash">
+          </div>
+          <div class="form-group">
+            <label for="cfg-model-giai">Model vai trò "giai"</label>
+            <input type="text" id="cfg-model-giai" placeholder="gemini-3.8-flash">
+          </div>
+          <div class="form-group">
+            <label for="cfg-model-hoatanh">Model vai trò "hoat_anh"</label>
+            <input type="text" id="cfg-model-hoatanh" placeholder="gemini-3.8-flash">
+          </div>
+        </div>
+
+        <!-- 2. Hạn mức miễn phí -->
+        <div class="section-title">2. Hạn mức Gói Miễn Phí (Rate Limit)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cfg-rpm">Số lượt tối đa mỗi phút (RPM)</label>
+            <input type="number" id="cfg-rpm" min="1" max="1000" value="60">
+          </div>
+          <div class="form-group">
+            <label for="cfg-rpd">Số lượt tối đa mỗi ngày (RPD)</label>
+            <input type="number" id="cfg-rpd" min="1" max="50000" value="100">
+          </div>
+        </div>
+
+        <!-- 3. Lưu trữ GitHub -->
+        <div class="section-title">3. Kho dữ liệu GitHub</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cfg-gh-owner">Chủ sở hữu (Owner)</label>
+            <input type="text" id="cfg-gh-owner" value="meanmuamuoi1510">
+          </div>
+          <div class="form-group">
+            <label for="cfg-gh-repo">Tên Repo dữ liệu</label>
+            <input type="text" id="cfg-gh-repo" value="uet-study-data">
+          </div>
+          <div class="form-group">
+            <label for="cfg-gh-branch">Nhánh (Branch)</label>
+            <input type="text" id="cfg-gh-branch" value="main">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cfg-gh-token">GitHub Personal Access Token (Fine-grained hoặc Classic)</label>
+          <div class="secret-wrap">
+            <input type="password" id="cfg-gh-token" placeholder="ghp_... hoặc github_pat_..." autocomplete="off">
+            <button type="button" class="btn-toggle-secret" data-target="cfg-gh-token">Hiện</button>
+          </div>
+        </div>
+
+        <!-- Khu vực hiển thị kết quả kiểm tra -->
+        <div class="section-title">4. Kiểm tra Kết nối</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+          <button type="button" id="btn-test-ai">⚡ Kiểm tra kết nối AI</button>
+          <button type="button" id="btn-test-gh">🐙 Kiểm tra kết nối GitHub (_ping.json)</button>
+        </div>
+        <div class="log-box" id="settings-test-log">Chưa chạy kiểm tra.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-danger" id="btn-clear-secrets">🗑 Xóa toàn bộ Key & Token</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btn-cancel-settings">Đóng</button>
+          <button type="button" class="btn-primary" id="btn-save-settings">💾 Lưu cài đặt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hộp thoại xác nhận vượt hạn mức ngày -->
+  <div class="modal-backdrop" id="quota-confirm-modal">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <span>⚠️ Đã chạm hạn mức ngày</span>
+      </div>
+      <div class="modal-body">
+        <p id="quota-confirm-msg" style="line-height:1.5; margin-bottom:12px;">
+          Bạn đã dùng hết số lượt AI ước tính trong ngày. Vì bộ đếm này chỉ là ước tính phía trình duyệt, bạn có muốn tiếp tục gửi yêu cầu này không?
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content:flex-end;">
+        <button type="button" id="btn-quota-cancel">Hủy lệnh gọi</button>
+        <button type="button" id="btn-quota-reset-and-go">Đặt lại bộ đếm & Gọi</button>
+        <button type="button" class="btn-primary" id="btn-quota-continue">Vẫn gọi tiếp</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. CẤU HÌNH (Hằng số, Đường dẫn hợp đồng dữ liệu, Quản lý localStorage, Bảo mật)
+       ========================================================================== */
+
+    const STORAGE_KEYS = {
+      SETTINGS: 'mechastudy_settings_v1',
+      QUOTA: 'mechastudy_daily_quota_v1',
+      THEME: 'mechastudy_theme_v1'
+    };
+
+    // Hợp đồng dữ liệu trên repo GitHub (Chuẩn bị cho Chặng 2, 3, 4)
+    const REPO_PATHS = {
+      SUBJECTS_FILE: 'subjects.json',
+      INDEX_DIR: 'index',
+      DATA_DIR: 'data'
+    };
+
+    /**
+     * Tạo đầy đủ đường dẫn theo hợp đồng dữ liệu trên repo
+     * @param {string} ngay Chuỗi ngày dạng YYYY-MM-DD
+     * @param {string} hash8 Chuỗi băm 8 ký tự định danh phiên
+     * @returns {Object} Các đường dẫn chuẩn trên GitHub repo
+     */
+    function buildPaths(ngay, hash8) {
+      const cleanDate = String(ngay || '').trim();
+      const parts = cleanDate.split('-');
+      if (parts.length !== 3) {
+        throw new Error('Định dạng ngày không hợp lệ (cần YYYY-MM-DD): ' + cleanDate);
+      }
+      const [yyyy, mm] = parts;
+      const safeHash = String(hash8 || '00000000').trim();
+      const baseFolder = `${REPO_PATHS.DATA_DIR}/${yyyy}/${mm}/${cleanDate}_${safeHash}`;
+
+      return {
+        subjects: REPO_PATHS.SUBJECTS_FILE,
+        monthIndex: `${REPO_PATHS.INDEX_DIR}/${yyyy}-${mm}.json`,
+        baseDir: baseFolder,
+        meta: `${baseFolder}/meta.json`,
+        kienthuc: `${baseFolder}/kienthuc.json`,
+        baitap: `${baseFolder}/baitap.json`,
+        hinh: (idBai) => `${baseFolder}/hinh/${idBai}.jpg`,
+        anim: (idBai) => `${baseFolder}/anim/${idBai}.html`
+      };
+    }
+
+    /**
+     * Escape mọi chuỗi trước khi đưa vào DOM để chống XSS
+     */
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function createDefaultProviderConfig() {
+      return {
+        apiKey: '',
+        baseUrl: 'https://api.openai.com',
+        models: {
+          quet: 'gemini-3.8-flash',
+          giai: 'gemini-3.8-flash',
+          hoat_anh: 'gemini-3.8-flash'
+        }
+      };
+    }
+
+    function getDefaultSettings() {
+      return {
+        activeProvider: 'gemini',
+        reasoningEffort: '',
+        providers: {
+          gemini: createDefaultProviderConfig(),
+          claude: createDefaultProviderConfig(),
+          openai: createDefaultProviderConfig(),
+          compat: createDefaultProviderConfig()
+        },
+        limits: {
+          maxPerMinute: 60,
+          maxPerDay: 100
+        },
+        github: {
+          owner: 'meanmuamuoi1510',
+          repo: 'uet-study-data',
+          branch: 'main',
+          token: ''
+        }
+      };
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+        if (!raw) return getDefaultSettings();
+        const parsed = JSON.parse(raw);
+        const def = getDefaultSettings();
+
+        // Gộp sâu an toàn để đảm bảo đủ trường khi nâng cấp chặng sau
+        const merged = {
+          activeProvider: parsed.activeProvider || def.activeProvider,
+          reasoningEffort: typeof parsed.reasoningEffort === 'string' ? parsed.reasoningEffort : '',
+          providers: {},
+          limits: {
+            maxPerMinute: Number(parsed?.limits?.maxPerMinute) > 0 ? Number(parsed.limits.maxPerMinute) : def.limits.maxPerMinute,
+            maxPerDay: Number(parsed?.limits?.maxPerDay) > 0 ? Number(parsed.limits.maxPerDay) : def.limits.maxPerDay
+          },
+          github: {
+            owner: parsed?.github?.owner || def.github.owner,
+            repo: parsed?.github?.repo || def.github.repo,
+            branch: parsed?.github?.branch || def.github.branch,
+            token: parsed?.github?.token || ''
+          }
+        };
+
+        for (const p of ['gemini', 'claude', 'openai', 'compat']) {
+          const src = parsed?.providers?.[p] || {};
+          merged.providers[p] = {
+            apiKey: src.apiKey || '',
+            baseUrl: src.baseUrl || 'https://api.openai.com',
+            models: {
+              quet: src?.models?.quet || 'gemini-3.8-flash',
+              giai: src?.models?.giai || 'gemini-3.8-flash',
+              hoat_anh: src?.models?.hoat_anh || 'gemini-3.8-flash'
+            }
+          };
+        }
+        return merged;
+      } catch (e) {
+        return getDefaultSettings();
+      }
+    }
+
+    function saveSettings(newSettings) {
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(newSettings));
+      updateQuotaUI();
+    }
+
+
+    /* ==========================================================================
+       2. ĐIỀU TIẾT LƯỢT GỌI (Rate Limiter cửa sổ trượt 60s, Bộ đếm ngày, Retry 429)
+       ========================================================================== */
+
+    const rateLimiterState = {
+      queue: Promise.resolve(),
+      minuteTimestamps: [] // Lưu mốc thời gian (ms) của các lượt gọi trong 60s gần nhất
+    };
+
+    function getTodayDateString() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getDailyQuotaState() {
+      const today = getTodayDateString();
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.QUOTA);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.date === today && typeof parsed.count === 'number') {
+            return parsed;
+          }
+        }
+      } catch (e) { /* Bỏ qua lỗi đọc JSON */ }
+      const fresh = { date: today, count: 0 };
+      localStorage.setItem(STORAGE_KEYS.QUOTA, JSON.stringify(fresh));
+      return fresh;
+    }
+
+    function incrementDailyQuota() {
+      const state = getDailyQuotaState();
+      state.count += 1;
+      localStorage.setItem(STORAGE_KEYS.QUOTA, JSON.stringify(state));
+      updateQuotaUI();
+    }
+
+    function resetDailyQuota() {
+      const fresh = { date: getTodayDateString(), count: 0 };
+      localStorage.setItem(STORAGE_KEYS.QUOTA, JSON.stringify(fresh));
+      updateQuotaUI();
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function setRateLimitBanner(visible, message = 'Đang chờ hạn mức...') {
+      const banner = document.getElementById('rl-wait-banner');
+      const textEl = document.getElementById('rl-wait-text');
+      if (!banner || !textEl) return;
+      if (visible) {
+        textEl.textContent = message;
+        banner.style.display = 'inline-flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    /**
+     * Hiển thị hộp thoại hỏi người dùng khi chạm hạn mức ngày
+     * @returns {Promise<boolean>} true nếu đồng ý gọi tiếp
+     */
+    function askUserQuotaOverride(used, maxDay) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('quota-confirm-modal');
+        const msg = document.getElementById('quota-confirm-msg');
+        const btnCancel = document.getElementById('btn-quota-cancel');
+        const btnContinue = document.getElementById('btn-quota-continue');
+        const btnResetGo = document.getElementById('btn-quota-reset-and-go');
+
+        msg.textContent = `Hôm nay đã dùng ${used}/${maxDay} lượt AI (ước tính). Bạn có muốn tiếp tục thực hiện lời gọi này không?`;
+        modal.classList.add('open');
+
+        const cleanup = () => {
+          modal.classList.remove('open');
+          btnCancel.onclick = null;
+          btnContinue.onclick = null;
+          btnResetGo.onclick = null;
+        };
+
+        btnCancel.onclick = () => { cleanup(); resolve(false); };
+        btnContinue.onclick = () => { cleanup(); resolve(true); };
+        btnResetGo.onclick = () => {
+          resetDailyQuota();
+          cleanup();
+          resolve(true);
+        };
+      });
+    }
+
+    /**
+     * Chờ cửa sổ trượt 60 giây nếu số lượt trong phút đạt ngưỡng tối đa
+     */
+    async function waitForMinuteWindow(maxPerMinute) {
+      while (true) {
+        const now = Date.now();
+        rateLimiterState.minuteTimestamps = rateLimiterState.minuteTimestamps.filter(t => now - t < 60000);
+        if (rateLimiterState.minuteTimestamps.length < maxPerMinute) {
+          rateLimiterState.minuteTimestamps.push(Date.now());
+          setRateLimitBanner(false);
+          return;
+        }
+        const oldest = rateLimiterState.minuteTimestamps[0];
+        const waitMs = Math.max(250, 60000 - (now - oldest) + 100);
+        setRateLimitBanner(true, `Đang chờ hạn mức... (${Math.ceil(waitMs / 1000)}s)`);
+        await sleep(waitMs);
+      }
+    }
+
+    /**
+     * Phân tích thời gian chờ gợi ý từ phản hồi lỗi 429 (Header Retry-After hoặc nội dung lỗi)
+     */
+    function extractRetryDelayMs(response, errorBodyText) {
+      if (response && response.headers) {
+        const retryAfter = response.headers.get('Retry-After');
+        if (retryAfter) {
+          const seconds = Number(retryAfter);
+          if (!Number.isNaN(seconds) && seconds > 0) return seconds * 1000;
+        }
+      }
+      if (errorBodyText) {
+        // Tìm mẫu như "retry in 5.2s" hoặc "retryDelay": "4s"
+        const matchSec = errorBodyText.match(/retry[^\d]*(\d+(?:\.\d+)?)\s*s/i);
+        if (matchSec) {
+          return Math.ceil( parseFloat(matchSec[1]) * 1000 );
+        }
+      }
+      return null;
+    }
+
+    /**
+     * Đưa một tác vụ gọi AI vào hàng đợi điều tiết
+     */
+    function scheduleRateLimitedCall(taskFn) {
+      const chained = rateLimiterState.queue.then(async () => {
+        const settings = loadSettings();
+        const maxPerMinute = settings.limits.maxPerMinute || 60;
+        const maxPerDay = settings.limits.maxPerDay || 100;
+
+        // 1. Kiểm tra hạn mức ngày
+        const daily = getDailyQuotaState();
+        if (daily.count >= maxPerDay) {
+          const allow = await askUserQuotaOverride(daily.count, maxPerDay);
+          if (!allow) {
+            throw new Error('Đã dừng lời gọi AI do chạm hạn mức tối đa trong ngày.');
+          }
+        }
+
+        // 2. Kiểm tra cửa sổ trượt 60 giây
+        await waitForMinuteWindow(maxPerMinute);
+
+        // 3. Thực thi kèm cơ chế thử lại khi gặp 429 / RESOURCE_EXHAUSTED
+        const backoffDelays = [2000, 4000, 8000];
+        let attempt = 0;
+
+        while (true) {
+          try {
+            const result = await taskFn();
+            // Đếm lượt thành công
+            incrementDailyQuota();
+            setRateLimitBanner(false);
+            return result;
+          } catch (err) {
+            // Nếu lỗi có đánh dấu đã tiêu tốn quota (như 429 hoặc phản hồi từ máy chủ AI)
+            if (err && err.isTransient) {
+              if (attempt < backoffDelays.length) {
+                const waitMs = backoffDelays[attempt];
+                attempt++;
+                setRateLimitBanner(true, `Máy chủ AI đang bận, thử lại lần ${attempt}/3 sau ${Math.ceil(waitMs / 1000)}s...`);
+                await sleep(waitMs);
+                continue;
+              }
+              setRateLimitBanner(false);
+              throw new Error('Máy chủ AI vẫn đang bận sau 3 lần thử lại. Hãy chờ vài phút rồi bấm lại, hoặc đổi sang model khác trong Cài đặt. (' + err.message + ')');
+            }
+
+            if (err && err.isRateLimit429) {
+              if (attempt < backoffDelays.length) {
+                const waitMs = err.suggestedRetryMs || backoffDelays[attempt];
+                attempt++;
+                setRateLimitBanner(true, `Quá tải 429, thử lại lần ${attempt}/3 sau ${Math.ceil(waitMs / 1000)}s...`);
+                await sleep(waitMs);
+                continue;
+              } else {
+                incrementDailyQuota();
+                setRateLimitBanner(false);
+                throw new Error('Hết hạn mức (Quota/429): Đã thử lại 3 lần (2s, 4s, 8s) nhưng máy chủ AI vẫn từ chối. Vui lòng chờ ít phút hoặc kiểm tra gói cước.');
+              }
+            }
+
+            if (err && err.countQuota) {
+              incrementDailyQuota();
+            }
+            setRateLimitBanner(false);
+            throw err;
+          }
+        }
+      });
+
+      // Giữ cho chuỗi hàng đợi không bị đứt khi một lệnh lỗi
+      rateLimiterState.queue = chained.catch(() => {});
+      return chained;
+    }
+
+
+    /* ==========================================================================
+       3. ADAPTER AI (Hàm trừu tượng callLLM hỗ trợ Gemini, Claude, OpenAI/Compat)
+       ========================================================================== */
+
+    /**
+     * Tách chuỗi ảnh (Data URL hoặc Base64 thuần) thành { mimeType, base64Data }
+     */
+    function normalizeImageInput(imgItem) {
+      if (!imgItem) return null;
+      if (typeof imgItem === 'object' && imgItem.data) {
+        return {
+          mimeType: imgItem.mimeType || 'image/jpeg',
+          base64Data: imgItem.data.replace(/^data:[^;]+;base64,/, '')
+        };
+      }
+      const str = String(imgItem);
+      const match = str.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        return { mimeType: match[1], base64Data: match[2] };
+      }
+      return { mimeType: 'image/jpeg', base64Data: str };
+    }
+
+    /**
+     * Thực hiện fetch có Timeout và bắt lỗi mạng rõ ràng bằng tiếng Việt
+     */
+    async function fetchWithTimeout(url, options, timeoutMs = 120000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          const timeoutErr = new Error(`Hết thời gian chờ phản hồi từ máy chủ AI (quá ${Math.round(timeoutMs / 1000)} giây).`);
+          timeoutErr.countQuota = false;
+          timeoutErr.isTransient = true; // cho phép tự thử lại
+          throw timeoutErr;
+        }
+        const netErr = new Error('Lỗi kết nối mạng khi gọi AI. Vui lòng kiểm tra Internet hoặc cấu hình CORS/Base URL.');
+        netErr.countQuota = false;
+        throw netErr;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    /**
+     * Phân loại lỗi HTTP từ các nhà cung cấp AI sang thông báo tiếng Việt rõ nghĩa
+     */
+    function handleAIHttpError(status, bodyText, response) {
+      const upper = (bodyText || '').toUpperCase();
+      if (status === 401 || status === 403 || upper.includes('API_KEY_INVALID') || upper.includes('INVALID_API_KEY')) {
+        const e = new Error('Sai API Key hoặc Key không có quyền truy cập mô hình này (Lỗi 401/403).');
+        e.countQuota = false;
+        throw e;
+      }
+      if (status === 429 || upper.includes('RESOURCE_EXHAUSTED') || upper.includes('RATE_LIMIT')) {
+        const e = new Error('Chạm giới hạn tốc độ hoặc hết hạn mức (429 / RESOURCE_EXHAUSTED).');
+        e.isRateLimit429 = true;
+        e.suggestedRetryMs = extractRetryDelayMs(response, bodyText);
+        throw e;
+      }
+      let shortDetail = (bodyText || '').slice(0, 220);
+      const e = new Error(`Lỗi máy chủ AI (HTTP ${status}): ${shortDetail}`);
+      e.countQuota = status >= 400 && status < 500;
+      if (status === 500 || status === 502 || status === 503 || status === 504) {
+        e.isTransient = true; // máy chủ đang bận, thường tự hết
+      }
+      throw e;
+    }
+
+    /**
+     * Adapter 1: Google Gemini
+     */
+    async function invokeGemini({ apiKey, model, system, text, images, jsonSchema, maxTokens, reasoningEffort }) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const parts = [];
+      if (text) parts.push({ text: String(text) });
+      if (Array.isArray(images)) {
+        for (const img of images) {
+          const norm = normalizeImageInput(img);
+          if (norm) {
+            parts.push({
+              inline_data: {
+                mime_type: norm.mimeType,
+                data: norm.base64Data
+              }
+            });
+          }
+        }
+      }
+
+      const generationConfig = {};
+      if (maxTokens) generationConfig.maxOutputTokens = Number(maxTokens);
+      if (jsonSchema) {
+        generationConfig.responseMimeType = 'application/json';
+        generationConfig.responseSchema = jsonSchema;
+      }
+      if (reasoningEffort) {
+        // Gemini 3.x dùng thinkingLevel (minimal/low/medium/high); số nguyên thì coi là thinkingBudget
+        const r = String(reasoningEffort).trim().toLowerCase();
+        if (['minimal', 'low', 'medium', 'high'].includes(r)) {
+          generationConfig.thinkingConfig = { thinkingLevel: r };
+        } else if (r !== '' && !isNaN(Number(r))) {
+          generationConfig.thinkingConfig = { thinkingBudget: Number(r) };
+        }
+      }
+
+      const payload = {
+        contents: [{ role: 'user', parts }],
+        generationConfig
+      };
+      if (system) {
+        payload.systemInstruction = { parts: [{ text: String(system) }] };
+      }
+
+      const sendGemini = () => fetchWithTimeout(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let res = await sendGemini();
+      let rawText = await res.text();
+      // Nếu model từ chối tham số thinking (HTTP 400) thì gửi lại một lần không kèm thinking
+      if (!res.ok && res.status === 400 && generationConfig.thinkingConfig && /think/i.test(rawText)) {
+        delete generationConfig.thinkingConfig;
+        res = await sendGemini();
+        rawText = await res.text();
+      }
+      if (!res.ok) handleAIHttpError(res.status, rawText, res);
+
+      let json;
+      try {
+        json = JSON.parse(rawText);
+      } catch (err) {
+        const e = new Error('Phản hồi từ Gemini không phải định dạng JSON hợp lệ.');
+        e.countQuota = true;
+        throw e;
+      }
+
+      const candidate = json?.candidates?.[0];
+      const finishReason = candidate?.finishReason;
+      if (finishReason === 'MAX_TOKENS') {
+        const e = new Error('Câu trả lời của Gemini bị cắt ngang do vượt quá giới hạn maxTokens (MAX_TOKENS).');
+        e.countQuota = true;
+        throw e;
+      }
+
+      const contentText = (candidate?.content?.parts || []).map(p => p.text || '').join('');
+      const usageMeta = json?.usageMetadata || {};
+      const usage = {
+        inputTokens: usageMeta.promptTokenCount || 0,
+        outputTokens: usageMeta.candidatesTokenCount || 0,
+        totalTokens: usageMeta.totalTokenCount || 0
+      };
+
+      return { rawOutput: contentText, usage };
+    }
+
+    /**
+     * Adapter 2: Anthropic Claude
+     */
+    async function invokeClaude({ apiKey, model, system, text, images, jsonSchema, maxTokens }) {
+      const url = 'https://api.anthropic.com/v1/messages';
+      const contentArr = [];
+
+      if (Array.isArray(images)) {
+        for (const img of images) {
+          const norm = normalizeImageInput(img);
+          if (norm) {
+            contentArr.push({
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: norm.mimeType,
+                data: norm.base64Data
+              }
+            });
+          }
+        }
+      }
+      if (text) {
+        contentArr.push({ type: 'text', text: String(text) });
+      }
+
+      const payload = {
+        model,
+        max_tokens: Number(maxTokens) || 4096,
+        messages: [{ role: 'user', content: contentArr }]
+      };
+      if (system) payload.system = String(system);
+
+      // Ép trả về JSON bằng cơ chế Tool Use bắt buộc
+      if (jsonSchema) {
+        payload.tools = [{
+          name: 'xuat_ket_qua_json',
+          description: 'Trả kết quả đúng cấu trúc JSON được yêu cầu.',
+          input_schema: jsonSchema
+        }];
+        payload.tool_choice = { type: 'tool', name: 'xuat_ket_qua_json' };
+      }
+
+      const res = await fetchWithTimeout(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const rawText = await res.text();
+      if (!res.ok) handleAIHttpError(res.status, rawText, res);
+
+      const json = JSON.parse(rawText);
+      if (json.stop_reason === 'max_tokens') {
+        const e = new Error('Câu trả lời của Claude bị cắt ngang do hết giới hạn maxTokens.');
+        e.countQuota = true;
+        throw e;
+      }
+
+      const usage = {
+        inputTokens: json?.usage?.input_tokens || 0,
+        outputTokens: json?.usage?.output_tokens || 0,
+        totalTokens: (json?.usage?.input_tokens || 0) + (json?.usage?.output_tokens || 0)
+      };
+
+      if (jsonSchema) {
+        const toolBlock = (json.content || []).find(c => c.type === 'tool_use' && c.name === 'xuat_ket_qua_json');
+        if (!toolBlock || !toolBlock.input) {
+          const e = new Error('Claude không trả về dữ liệu qua Tool JSON như yêu cầu.');
+          e.isCorruptedJson = true;
+          e.countQuota = true;
+          throw e;
+        }
+        return { rawOutput: JSON.stringify(toolBlock.input), usage };
+      }
+
+      const textOut = (json.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+      return { rawOutput: textOut, usage };
+    }
+
+    /**
+     * Adapter 3: OpenAI & OpenAI-tương-thích
+     */
+    async function invokeOpenAICompat({ apiKey, baseUrl, model, system, text, images, jsonSchema, maxTokens, reasoningEffort }) {
+      const cleanBase = String(baseUrl || 'https://api.openai.com').replace(/\/+$/, '');
+      const url = cleanBase.endsWith('/v1')
+        ? `${cleanBase}/chat/completions`
+        : `${cleanBase}/v1/chat/completions`;
+
+      const messages = [];
+      if (system) {
+        messages.push({ role: 'system', content: String(system) });
+      }
+
+      const userContent = [];
+      if (text) {
+        let promptText = String(text);
+        if (jsonSchema) {
+          promptText += `\n\nHãy trả lời CHỈ bằng một đối tượng JSON hợp lệ tuân theo JSON Schema sau:\n${JSON.stringify(jsonSchema)}`;
+        }
+        userContent.push({ type: 'text', text: promptText });
+      }
+      if (Array.isArray(images)) {
+        for (const img of images) {
+          const norm = normalizeImageInput(img);
+          if (norm) {
+            userContent.push({
+              type: 'image_url',
+              image_url: { url: `data:${norm.mimeType};base64,${norm.base64Data}` }
+            });
+          }
+        }
+      }
+      messages.push({ role: 'user', content: userContent });
+
+      const payload = {
+        model,
+        messages
+      };
+      if (maxTokens) payload.max_tokens = Number(maxTokens);
+      if (reasoningEffort) payload.reasoning_effort = reasoningEffort;
+      if (jsonSchema) {
+        payload.response_format = { type: 'json_object' };
+      }
+
+      const res = await fetchWithTimeout(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const rawText = await res.text();
+      if (!res.ok) handleAIHttpError(res.status, rawText, res);
+
+      const json = JSON.parse(rawText);
+      const choice = json?.choices?.[0];
+      if (choice?.finish_reason === 'length') {
+        const e = new Error('Câu trả lời từ OpenAI bị cắt ngang do vượt quá giới hạn maxTokens (finish_reason = length).');
+        e.countQuota = true;
+        throw e;
+      }
+
+      const contentText = choice?.message?.content || '';
+      const usage = {
+        inputTokens: json?.usage?.prompt_tokens || 0,
+        outputTokens: json?.usage?.completion_tokens || 0,
+        totalTokens: json?.usage?.total_tokens || 0
+      };
+
+      return { rawOutput: contentText, usage };
+    }
+
+    /**
+     * Hàm trừu tượng gọi AI dùng chung cho toàn bộ ứng dụng
+     * @param {Object} params { vai_tro, system, text, images, jsonSchema, maxTokens }
+     * @returns {Promise<{data: any, usage: Object}>}
+     */
+    async function callLLM({ vai_tro = 'giai', system = '', text = '', images = [], jsonSchema = null, maxTokens = 8192 } = {}) {
+      const settings = loadSettings();
+      const providerKey = settings.activeProvider || 'gemini';
+      const providerCfg = settings.providers[providerKey];
+
+      if (!providerCfg || !providerCfg.apiKey || !providerCfg.apiKey.trim()) {
+        throw new Error(`Chưa cấu hình API Key cho nhà cung cấp "${providerKey}". Vui lòng mở Cài đặt để nhập Key.`);
+      }
+
+      const roleKey = ['quet', 'giai', 'hoat_anh'].includes(vai_tro) ? vai_tro : 'giai';
+      const model = (providerCfg.models && providerCfg.models[roleKey]) || 'gemini-3.8-flash';
+      const apiKey = providerCfg.apiKey.trim();
+      const reasoningEffort = (settings.reasoningEffort || '').trim();
+
+      const executeSingleAttempt = async (extraRetryHint = '') => {
+        const effectiveText = extraRetryHint ? `${text}\n\n[Lưu ý hệ thống: ${extraRetryHint}]` : text;
+
+        const { rawOutput, usage } = await scheduleRateLimitedCall(async () => {
+          if (providerKey === 'gemini') {
+            return await invokeGemini({ apiKey, model, system, text: effectiveText, images, jsonSchema, maxTokens, reasoningEffort });
+          } else if (providerKey === 'claude') {
+            return await invokeClaude({ apiKey, model, system, text: effectiveText, images, jsonSchema, maxTokens });
+          } else {
+            const baseUrl = providerKey === 'openai' ? 'https://api.openai.com' : providerCfg.baseUrl;
+            return await invokeOpenAICompat({ apiKey, baseUrl, model, system, text: effectiveText, images, jsonSchema, maxTokens, reasoningEffort });
+          }
+        });
+
+        if (!jsonSchema) {
+          return { data: rawOutput, usage };
+        }
+
+        // Bóc tách và kiểm tra JSON nếu có yêu cầu jsonSchema
+        try {
+          const cleaned = String(rawOutput).trim().replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+          const parsedData = JSON.parse(cleaned);
+          return { data: parsedData, usage };
+        } catch (parseErr) {
+          const err = new Error('Mô hình AI trả về chuỗi JSON bị hỏng hoặc sai cú pháp.');
+          err.isCorruptedJson = true;
+          throw err;
+        }
+      };
+
+      // Tự động thử lại đúng 1 lần nếu JSON bị hỏng
+      try {
+        return await executeSingleAttempt('');
+      } catch (err) {
+        if (err && err.isCorruptedJson) {
+          return await executeSingleAttempt('Lần trả lời trước bị lỗi cú pháp JSON. Hãy chỉ xuất JSON hợp lệ, không kèm văn bản giải thích.');
+        }
+        throw err;
+      }
+    }
+
+
+    /* ==========================================================================
+       4. GITHUB (Module lưu trữ GitHub REST Contents API, hỗ trợ UTF-8 & bắt xung đột)
+       ========================================================================== */
+
+    function updateSyncStatus(state, label) {
+      const dot = document.getElementById('sync-dot');
+      const txt = document.getElementById('sync-text');
+      if (!dot || !txt) return;
+      dot.className = 'dot';
+      if (state === 'ok') dot.classList.add('ok');
+      else if (state === 'busy') dot.classList.add('busy');
+      else if (state === 'err') dot.classList.add('err');
+      txt.textContent = label;
+    }
+
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(String(str));
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
+      return btoa(binary);
+    }
+
+    function base64ToUtf8(b64) {
+      const clean = String(b64).replace(/\s/g, '');
+      const binary = atob(clean);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    function getGitHubContext() {
+      const { github } = loadSettings();
+      if (!github.owner || !github.repo || !github.token) {
+        throw new Error('Chưa cấu hình đầy đủ thông tin GitHub (Owner, Repo hoặc Token) trong hộp Cài đặt.');
+      }
+      const cleanOwner = encodeURIComponent(github.owner.trim());
+      const cleanRepo = encodeURIComponent(github.repo.trim());
+      const branch = github.branch.trim() || 'main';
+      const token = github.token.trim();
+
+      return { cleanOwner, cleanRepo, branch, token };
+    }
+
+    function encodeGitHubPath(path) {
+      return String(path)
+        .replace(/^\/+/, '')
+        .split('/')
+        .map(seg => encodeURIComponent(seg))
+        .join('/');
+    }
+
+    function buildGitHubHeaders(token, acceptHeader = 'application/vnd.github+json') {
+      return {
+        'Authorization': `Bearer ${token}`,
+        'Accept': acceptHeader,
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+    }
+
+    /**
+     * Đọc nội dung file và SHA từ GitHub
+     * @param {string} path Đường dẫn file trong repo
+     * @returns {Promise<{content: string, sha: string} | null>}
+     */
+    async function ghGetFile(path) {
+      const { cleanOwner, cleanRepo, branch, token } = getGitHubContext();
+      const encodedPath = encodeGitHubPath(path);
+      const url = `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`;
+
+      try {
+        // 1. Lấy metadata để có SHA chính xác
+        const metaRes = await fetch(url, {
+          method: 'GET',
+          headers: buildGitHubHeaders(token, 'application/vnd.github+json'),
+          cache: 'no-store'
+        });
+
+        if (metaRes.status === 404) {
+          updateSyncStatus('ok', 'Đã kết nối');
+          return null;
+        }
+        if (!metaRes.ok) {
+          const errText = await metaRes.text();
+          updateSyncStatus('err', 'Lỗi');
+          throw new Error(`Lỗi đọc metadata GitHub (${metaRes.status}): ${errText.slice(0, 150)}`);
+        }
+
+        const metaJson = await metaRes.json();
+        const sha = metaJson.sha;
+
+        // 2. Đọc nội dung raw theo đúng yêu cầu dùng Accept: application/vnd.github.raw
+        const rawRes = await fetch(url, {
+          method: 'GET',
+          headers: buildGitHubHeaders(token, 'application/vnd.github.raw'),
+          cache: 'no-store'
+        });
+
+        if (!rawRes.ok) {
+          // Dự phòng giải mã từ trường content base64 nếu raw request gặp sự cố
+          if (metaJson.content) {
+            updateSyncStatus('ok', 'Đã kết nối');
+            return { content: base64ToUtf8(metaJson.content), sha };
+          }
+          throw new Error(`Lỗi tải nội dung raw từ GitHub (${rawRes.status}).`);
+        }
+
+        const content = await rawRes.text();
+        updateSyncStatus('ok', 'Đã kết nối');
+        return { content, sha };
+      } catch (err) {
+        updateSyncStatus('err', 'Lỗi');
+        throw err;
+      }
+    }
+
+    /**
+     * Ghi mới hoặc cập nhật file lên GitHub (Xử lý UTF-8 tiếng Việt & phát hiện xung đột 409/422)
+     * @param {string} path Đường dẫn file
+     * @param {string} contentString Nội dung chuỗi UTF-8
+     * @param {string} message Thông điệp commit
+     * @param {string} [sha] SHA hiện tại của file (nếu cập nhật)
+     */
+    async function ghPutFile(path, contentString, message, sha = undefined) {
+      const { cleanOwner, cleanRepo, branch, token } = getGitHubContext();
+      const encodedPath = encodeGitHubPath(path);
+      const url = `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${encodedPath}`;
+
+      updateSyncStatus('busy', 'Đang lưu');
+
+      try {
+        let effectiveSha = sha;
+        if (!effectiveSha) {
+          const existing = await ghGetFile(path);
+          if (existing && existing.sha) {
+            effectiveSha = existing.sha;
+          }
+        }
+
+        const bodyObj = {
+          message: message || `Cập nhật ${path}`,
+          content: utf8ToBase64(contentString),
+          branch
+        };
+        if (effectiveSha) bodyObj.sha = effectiveSha;
+
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            ...buildGitHubHeaders(token, 'application/vnd.github+json'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bodyObj)
+        });
+
+        if (res.status === 409 || res.status === 422) {
+          // Khi xung đột 409/422: tải lại SHA mới nhất và báo cho hàm gọi
+          const latest = await ghGetFile(path);
+          const latestSha = latest ? latest.sha : null;
+          updateSyncStatus('err', 'Lỗi');
+          const conflictErr = new Error(
+            `Xung đột phiên bản trên GitHub (HTTP ${res.status}) tại file "${path}". Đã tải lại SHA mới nhất (${latestSha || 'không có'}).`
+          );
+          conflictErr.code = res.status;
+          conflictErr.latestSha = latestSha;
+          conflictErr.latestContent = latest ? latest.content : null;
+          throw conflictErr;
+        }
+
+        if (!res.ok) {
+          const errText = await res.text();
+          updateSyncStatus('err', 'Lỗi');
+          throw new Error(`Lỗi ghi file GitHub (${res.status}): ${errText.slice(0, 180)}`);
+        }
+
+        const data = await res.json();
+        updateSyncStatus('ok', 'Đã kết nối');
+        return {
+          sha: data?.content?.sha || null,
+          commitSha: data?.commit?.sha || null
+        };
+      } catch (err) {
+        updateSyncStatus('err', 'Lỗi');
+        throw err;
+      }
+    }
+
+    /**
+     * Liệt kê danh sách file và thư mục tại một đường dẫn trên repo
+     * @param {string} path Đường dẫn thư mục
+     */
+    async function ghListDir(path = '') {
+      const { cleanOwner, cleanRepo, branch, token } = getGitHubContext();
+      const encodedPath = encodeGitHubPath(path);
+      const url = `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`;
+
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: buildGitHubHeaders(token, 'application/vnd.github+json'),
+          cache: 'no-store'
+        });
+
+        if (res.status === 404) {
+          updateSyncStatus('ok', 'Đã kết nối');
+          return [];
+        }
+        if (!res.ok) {
+          const errText = await res.text();
+          updateSyncStatus('err', 'Lỗi');
+          throw new Error(`Lỗi đọc thư mục GitHub (${res.status}): ${errText.slice(0, 150)}`);
+        }
+
+        const data = await res.json();
+        updateSyncStatus('ok', 'Đã kết nối');
+        if (!Array.isArray(data)) return [data];
+        return data.map(item => ({
+          name: item.name,
+          path: item.path,
+          sha: item.sha,
+          size: item.size,
+          type: item.type // 'file' hoặc 'dir'
+        }));
+      } catch (err) {
+        updateSyncStatus('err', 'Lỗi');
+        throw err;
+      }
+    }
+
+    /**
+     * Xóa một file trên GitHub
+     */
+    async function ghDeleteFile(path, sha, message) {
+      const { cleanOwner, cleanRepo, branch, token } = getGitHubContext();
+      const encodedPath = encodeGitHubPath(path);
+      const url = `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${encodedPath}`;
+
+      updateSyncStatus('busy', 'Đang lưu');
+
+      try {
+        let targetSha = sha;
+        if (!targetSha) {
+          const current = await ghGetFile(path);
+          if (!current) {
+            updateSyncStatus('ok', 'Đã kết nối');
+            return true;
+          }
+          targetSha = current.sha;
+        }
+
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            ...buildGitHubHeaders(token, 'application/vnd.github+json'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: message || `Xóa file ${path}`,
+            sha: targetSha,
+            branch
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          updateSyncStatus('err', 'Lỗi');
+          throw new Error(`Lỗi xóa file GitHub (${res.status}): ${errText.slice(0, 150)}`);
+        }
+
+        updateSyncStatus('ok', 'Đã kết nối');
+        return true;
+      } catch (err) {
+        updateSyncStatus('err', 'Lỗi');
+        throw err;
+      }
+    }
+
+
+    /* ==========================================================================
+       5. CACHE (Module lưu đệm cục bộ bằng IndexedDB có bọc try/catch an toàn)
+       ========================================================================== */
+
+    const IDB_CONFIG = {
+      DB_NAME: 'mechastudy_cache_db',
+      STORE_NAME: 'kv_store',
+      VERSION: 1
+    };
+
+    let idbDatabasePromise = null;
+    let idbDisabledWarningShown = false;
+
+    function notifyIdbWarning(reason) {
+      if (idbDisabledWarningShown) return;
+      idbDisabledWarningShown = true;
+      const warnEl = document.getElementById('idb-warning');
+      if (warnEl) {
+        warnEl.style.display = 'block';
+        warnEl.textContent = '⚠️ Cảnh báo: IndexedDB không khả dụng trên trình duyệt này (' + reason + '). Ứng dụng vẫn hoạt động bình thường nhưng tắt bộ nhớ đệm cục bộ.';
+      }
+    }
+
+    function openCacheDB() {
+      if (idbDatabasePromise) return idbDatabasePromise;
+      idbDatabasePromise = new Promise((resolve, reject) => {
+        try {
+          if (!window.indexedDB) {
+            reject(new Error('Trình duyệt không hỗ trợ IndexedDB'));
+            return;
+          }
+          const req = window.indexedDB.open(IDB_CONFIG.DB_NAME, IDB_CONFIG.VERSION);
+          req.onupgradeneeded = (ev) => {
+            const db = ev.target.result;
+            if (!db.objectStoreNames.contains(IDB_CONFIG.STORE_NAME)) {
+              db.createObjectStore(IDB_CONFIG.STORE_NAME);
+            }
+          };
+          req.onsuccess = (ev) => resolve(ev.target.result);
+          req.onerror = () => reject(req.error || new Error('Không thể mở IndexedDB'));
+        } catch (err) {
+          reject(err);
+        }
+      });
+      return idbDatabasePromise;
+    }
+
+    async function dbGet(key) {
+      try {
+        const db = await openCacheDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_CONFIG.STORE_NAME, 'readonly');
+          const store = tx.objectStore(IDB_CONFIG.STORE_NAME);
+          const req = store.get(String(key));
+          req.onsuccess = () => resolve(req.result !== undefined ? req.result : null);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        notifyIdbWarning(err.message || 'Lỗi đọc');
+        return null;
+      }
+    }
+
+    async function dbSet(key, value) {
+      try {
+        const db = await openCacheDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_CONFIG.STORE_NAME, 'readwrite');
+          const store = tx.objectStore(IDB_CONFIG.STORE_NAME);
+          const req = store.put(value, String(key));
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        notifyIdbWarning(err.message || 'Lỗi ghi');
+        return false;
+      }
+    }
+
+    async function dbDelete(key) {
+      try {
+        const db = await openCacheDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_CONFIG.STORE_NAME, 'readwrite');
+          const store = tx.objectStore(IDB_CONFIG.STORE_NAME);
+          const req = store.delete(String(key));
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        notifyIdbWarning(err.message || 'Lỗi xóa');
+        return false;
+      }
+    }
+
+    async function dbKeys(prefix = '') {
+      try {
+        const db = await openCacheDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_CONFIG.STORE_NAME, 'readonly');
+          const store = tx.objectStore(IDB_CONFIG.STORE_NAME);
+          const req = store.getAllKeys();
+          req.onsuccess = () => {
+            const all = (req.result || []).map(k => String(k));
+            if (!prefix) resolve(all);
+            else resolve(all.filter(k => k.startsWith(String(prefix))));
+          };
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        notifyIdbWarning(err.message || 'Lỗi liệt kê khóa');
+        return [];
+      }
+    }
+
+
+    /* ==========================================================================
+       6. GIAO DIỆN (Gắn sự kiện DOM, Hộp Cài đặt, Chế độ Sáng/Tối, Kiểm tra kết nối)
+       ========================================================================== */
+
+    // Giữ bản nháp cài đặt trong lúc mở hộp thoại Cài đặt
+    let workingSettings = loadSettings();
+    let currentEditingProvider = workingSettings.activeProvider;
+
+    function updateQuotaUI() {
+      const settings = loadSettings();
+      const quota = getDailyQuotaState();
+      const el = document.getElementById('ai-quota-text');
+      if (el) {
+        el.textContent = `${quota.count}/${settings.limits.maxPerDay}`;
+      }
+    }
+
+    function applyTheme(theme) {
+      const valid = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', valid);
+      localStorage.setItem(STORAGE_KEYS.THEME, valid);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    }
+
+    /**
+     * Đồng bộ dữ liệu từ các ô input của hãng hiện tại vào bản nháp workingSettings
+     */
+    function syncProviderFieldsToDraft(providerName) {
+      if (!workingSettings.providers[providerName]) return;
+      const pObj = workingSettings.providers[providerName];
+      pObj.apiKey = document.getElementById('cfg-apikey').value.trim();
+      pObj.baseUrl = document.getElementById('cfg-baseurl').value.trim() || 'https://api.openai.com';
+      pObj.models.quet = document.getElementById('cfg-model-quet').value.trim() || 'gemini-3.8-flash';
+      pObj.models.giai = document.getElementById('cfg-model-giai').value.trim() || 'gemini-3.8-flash';
+      pObj.models.hoat_anh = document.getElementById('cfg-model-hoatanh').value.trim() || 'gemini-3.8-flash';
+    }
+
+    /**
+     * Đổ dữ liệu của một hãng AI lên các ô input trong hộp Cài đặt
+     */
+    function renderProviderFieldsFromDraft(providerName) {
+      const pObj = workingSettings.providers[providerName] || createDefaultProviderConfig();
+      document.getElementById('cfg-apikey').value = pObj.apiKey || '';
+      document.getElementById('cfg-baseurl').value = pObj.baseUrl || 'https://api.openai.com';
+      document.getElementById('cfg-model-quet').value = pObj.models.quet || 'gemini-3.8-flash';
+      document.getElementById('cfg-model-giai').value = pObj.models.giai || 'gemini-3.8-flash';
+      document.getElementById('cfg-model-hoatanh').value = pObj.models.hoat_anh || 'gemini-3.8-flash';
+
+      const baseWrap = document.getElementById('cfg-baseurl-wrap');
+      baseWrap.style.display = providerName === 'compat' ? 'block' : 'none';
+    }
+
+    function openSettingsModal() {
+      workingSettings = loadSettings();
+      currentEditingProvider = workingSettings.activeProvider || 'gemini';
+
+      document.getElementById('cfg-provider').value = currentEditingProvider;
+      document.getElementById('cfg-reasoning').value = workingSettings.reasoningEffort || '';
+      renderProviderFieldsFromDraft(currentEditingProvider);
+
+      document.getElementById('cfg-rpm').value = workingSettings.limits.maxPerMinute;
+      document.getElementById('cfg-rpd').value = workingSettings.limits.maxPerDay;
+
+      document.getElementById('cfg-gh-owner').value = workingSettings.github.owner;
+      document.getElementById('cfg-gh-repo').value = workingSettings.github.repo;
+      document.getElementById('cfg-gh-branch').value = workingSettings.github.branch;
+      document.getElementById('cfg-gh-token').value = workingSettings.github.token;
+
+      document.getElementById('settings-modal').classList.add('open');
+    }
+
+    function collectAndSaveSettingsFromModal() {
+      syncProviderFieldsToDraft(currentEditingProvider);
+      workingSettings.activeProvider = document.getElementById('cfg-provider').value;
+      workingSettings.reasoningEffort = document.getElementById('cfg-reasoning').value.trim();
+
+      const rpm = parseInt(document.getElementById('cfg-rpm').value, 10);
+      const rpd = parseInt(document.getElementById('cfg-rpd').value, 10);
+      workingSettings.limits.maxPerMinute = rpm > 0 ? rpm : 60;
+      workingSettings.limits.maxPerDay = rpd > 0 ? rpd : 100;
+
+      workingSettings.github.owner = document.getElementById('cfg-gh-owner').value.trim() || 'meanmuamuoi1510';
+      workingSettings.github.repo = document.getElementById('cfg-gh-repo').value.trim() || 'uet-study-data';
+      workingSettings.github.branch = document.getElementById('cfg-gh-branch').value.trim() || 'main';
+      workingSettings.github.token = document.getElementById('cfg-gh-token').value.trim();
+
+      saveSettings(workingSettings);
+    }
+
+    function setSettingsLog(text) {
+      const box = document.getElementById('settings-test-log');
+      if (box) box.innerHTML = escapeHTML(text);
+    }
+
+    async function handleTestAIConnection() {
+      collectAndSaveSettingsFromModal();
+      setSettingsLog('⏳ Đang gửi lời chào kiểm tra tới AI...');
+      try {
+        const res = await callLLM({
+          vai_tro: 'giai',
+          system: 'Bạn là trợ lý kỹ thuật cơ điện tử. Trả lời thật ngắn gọn trong 1 câu.',
+          text: 'Chào bạn, hãy xác nhận kết nối thành công bằng tiếng Việt.',
+          maxTokens: 2048
+        });
+        const reply = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
+        const u = res.usage || {};
+        setSettingsLog(
+          `✅ Kết nối AI thành công!\n` +
+          `- Phản hồi: ${reply.trim()}\n` +
+          `- Token đã dùng: Input=${u.inputTokens || 0}, Output=${u.outputTokens || 0}, Tổng=${u.totalTokens || 0}`
+        );
+      } catch (err) {
+        setSettingsLog(`❌ Lỗi kết nối AI:\n${err.message}`);
+      }
+    }
+
+    async function handleTestGitHubConnection() {
+      collectAndSaveSettingsFromModal();
+      setSettingsLog('⏳ Đang ghi thử file _ping.json lên GitHub rồi đọc lại...');
+      try {
+        const payload = JSON.stringify({
+          app: 'MechaStudy - Cơ Điện Tử',
+          stage: 1,
+          message: 'Kiểm tra tiếng Việt UTF-8: Cơ học lý thuyết & Vật lý đại cương',
+          timestamp: new Date().toISOString()
+        }, null, 2);
+
+        const putRes = await ghPutFile('_ping.json', payload, 'Kiểm tra kết nối từ MechaStudy (Chặng 1)');
+        const readBack = await ghGetFile('_ping.json');
+
+        if (!readBack || !readBack.content) {
+          throw new Error('Ghi thành công nhưng không đọc lại được nội dung _ping.json.');
+        }
+
+        setSettingsLog(
+          `✅ Kết nối GitHub thành công!\n` +
+          `- SHA mới ghi: ${putRes.sha}\n` +
+          `- Nội dung đọc lại từ _ping.json:\n${readBack.content}`
+        );
+      } catch (err) {
+        setSettingsLog(`❌ Lỗi kết nối GitHub:\n${err.message}`);
+      }
+    }
+
+    function handleClearSecrets() {
+      const s = loadSettings();
+      for (const p of Object.keys(s.providers)) {
+        s.providers[p].apiKey = '';
+      }
+      s.github.token = '';
+      saveSettings(s);
+      workingSettings = s;
+      document.getElementById('cfg-apikey').value = '';
+      document.getElementById('cfg-gh-token').value = '';
+      setSettingsLog('🗑 Đã xóa toàn bộ API Key và GitHub Token khỏi localStorage.');
+    }
+
+    function initApp() {
+      // Khởi tạo giao diện Sáng/Tối
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'light';
+      applyTheme(savedTheme);
+
+      // Cập nhật bộ đếm lượt gọi trên thanh trạng thái
+      updateQuotaUI();
+
+      // Kiểm tra thử IndexedDB ngay khi khởi động
+      dbKeys('').catch(() => {});
+
+      // Gắn sự kiện Header & Sidebar
+      document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+      document.getElementById('btn-reset-quota').addEventListener('click', () => {
+        resetDailyQuota();
+      });
+
+      // Gắn sự kiện Hộp Cài đặt
+      document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
+      document.getElementById('btn-close-settings').addEventListener('click', () => {
+        document.getElementById('settings-modal').classList.remove('open');
+      });
+      document.getElementById('btn-cancel-settings').addEventListener('click', () => {
+        document.getElementById('settings-modal').classList.remove('open');
+      });
+
+      document.getElementById('cfg-provider').addEventListener('change', (e) => {
+        syncProviderFieldsToDraft(currentEditingProvider);
+        currentEditingProvider = e.target.value;
+        renderProviderFieldsFromDraft(currentEditingProvider);
+      });
+
+      document.getElementById('btn-save-settings').addEventListener('click', () => {
+        collectAndSaveSettingsFromModal();
+        setSettingsLog('💾 Đã lưu cài đặt vào localStorage.');
+        document.getElementById('settings-modal').classList.remove('open');
+      });
+
+      document.getElementById('btn-test-ai').addEventListener('click', handleTestAIConnection);
+      document.getElementById('btn-test-gh').addEventListener('click', handleTestGitHubConnection);
+      document.getElementById('btn-clear-secrets').addEventListener('click', handleClearSecrets);
+
+      // Nút Hiện/Ẩn cho các ô password (API key & Token)
+      document.querySelectorAll('.btn-toggle-secret').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          if (!input) return;
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'Ẩn';
+          } else {
+            input.type = 'password';
+            btn.textContent = 'Hiện';
+          }
+        });
+      });
+
+      // Nút kiểm tra hàm buildPaths ở màn hình chính
+      document.getElementById('btn-test-paths').addEventListener('click', () => {
+        const logEl = document.getElementById('main-log-box');
+        try {
+          const d = document.getElementById('test-date').value;
+          const h = document.getElementById('test-hash').value;
+          const paths = buildPaths(d, h);
+          const demoOutput = {
+            subjects: paths.subjects,
+            monthIndex: paths.monthIndex,
+            meta: paths.meta,
+            kienthuc: paths.kienthuc,
+            baitap: paths.baitap,
+            hinh_mau: paths.hinh('bai_01'),
+            anim_mau: paths.anim('bai_01')
+          };
+          logEl.innerHTML = escapeHTML(JSON.stringify(demoOutput, null, 2));
+        } catch (err) {
+          logEl.innerHTML = escapeHTML('Lỗi: ' + err.message);
+        }
+      });
+    }
+
+    // Xuất các hàm công khai lên đối tượng window để Chặng 2, 3, 4 sử dụng trực tiếp
+    window.callLLM = callLLM;
+    window.ghGetFile = ghGetFile;
+    window.ghPutFile = ghPutFile;
+    window.ghListDir = ghListDir;
+    window.ghDeleteFile = ghDeleteFile;
+    window.dbGet = dbGet;
+    window.dbSet = dbSet;
+    window.dbDelete = dbDelete;
+    window.dbKeys = dbKeys;
+    window.buildPaths = buildPaths;
+    window.escapeHTML = escapeHTML;
+    window.loadSettings = loadSettings;
+    window.saveSettings = saveSettings;
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+  <script src="stage2.js"></script>
+</body>
+</html>
