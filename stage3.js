@@ -185,6 +185,12 @@
         gap: 6px;
         margin-bottom: 2px;
       }
+      .s3-mini-del {
+        border: none; background: transparent; cursor: pointer;
+        font-size: 0.9rem; padding: 2px 6px; margin-left: 6px;
+        border-radius: 6px; opacity: 0.8; flex-shrink: 0;
+      }
+      .s3-mini-del:hover { background: rgba(220, 38, 38, 0.14); opacity: 1; }
       .s3-chap-item:hover {
         background: var(--bg-sidebar, #e2e8f0);
       }
@@ -892,6 +898,14 @@
       return;
     }
 
+    const noFilterNow = !(S3_STATE.searchQuery.trim() || S3_STATE.activeHashtags.length > 0);
+    const emptyChapCount = noFilterNow
+      ? subjectsList.reduce((acc, subj) => acc + (subj.chuong || []).filter(ch =>
+          !filteredItems.some(it =>
+            normalizeSearchText(it.mon_hoc) === normalizeSearchText(subj.ten) &&
+            Number(it.chuong?.so) === (Number(ch.so) || 1))).length, 0)
+      : 0;
+
     const groupsHtml = subjectsList.map((subj, sIdx) => {
       const monName = subj.ten || 'Môn học';
       const isCollapsed = Boolean(S3_STATE.collapsedSubjects[monName]);
@@ -926,6 +940,7 @@
               Chương ${chSo}: ${escapeHTML(chTen)}
             </span>
             <span class="s3-chap-count">${totalExercises} bài</span>
+            ${matchingFiles.length === 0 ? `<button type="button" class="s3-mini-del" data-act="del-chap" data-mon="${escapeHTML(monName)}" data-so="${chSo}" title="Xóa chương trống này khỏi danh mục">🗑️</button>` : ''}
           </div>
         `;
       }).join('');
@@ -938,7 +953,7 @@
         <div class="s3-subj-group" data-subj-idx="${sIdx}">
           <div class="s3-subj-header" data-mon="${escapeHTML(monName)}">
             <span>📘 ${escapeHTML(monName)}</span>
-            <span style="font-size:0.75rem; color:var(--text-muted);">${isCollapsed ? '▶' : '▼'}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center;">${isCollapsed ? '▶' : '▼'}${(noFilterNow && !filteredItems.some(it => normalizeSearchText(it.mon_hoc) === normalizeSearchText(monName))) ? `<button type="button" class="s3-mini-del" data-act="del-subj" data-mon="${escapeHTML(monName)}" title="Xóa môn trống này khỏi danh mục">🗑️</button>` : ''}</span>
           </div>
           ${!isCollapsed ? `<div class="s3-chap-list">${chaptersHtml || '<div style="padding:6px; font-size:0.78rem; color:var(--text-muted);">Chưa có chương</div>'}</div>` : ''}
         </div>
@@ -948,6 +963,7 @@
     bodyEl.innerHTML = `
       ${offlineBannerHtml}
       ${groupsHtml || '<div style="padding:12px; color:var(--text-muted); font-size:0.84rem;">Không có chương nào khớp bộ lọc.</div>'}
+      ${emptyChapCount > 0 ? `<button type="button" class="btn-sm" style="width:100%; margin-top:8px;" id="s3-btn-clean-empty">🧹 Dọn mục trống (${emptyChapCount} chương)</button>` : ''}
       ${unloadedCount > 0 ? `<button type="button" class="btn-sm" style="width:100%; margin-top:8px;" id="s3-btn-load-older">📂 Xem cũ hơn (${unloadedCount} tháng chưa tải)</button>` : ''}
     `;
 
@@ -957,6 +973,19 @@
         const mon = hdr.getAttribute('data-mon');
         S3_STATE.collapsedSubjects[mon] = !S3_STATE.collapsedSubjects[mon];
         renderSidebarBody();
+      });
+    });
+
+    // Nút xóa chương/môn trống (chặn nổi bọt để không mở chương hay thu gọn môn)
+    bodyEl.querySelectorAll('.s3-mini-del').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const mon = btn.getAttribute('data-mon');
+        if (btn.getAttribute('data-act') === 'del-subj') {
+          deleteEmptySubjectOrChapter(mon, null);
+        } else {
+          deleteEmptySubjectOrChapter(mon, Number(btn.getAttribute('data-so')) || 1);
+        }
       });
     });
 
@@ -977,6 +1006,10 @@
     const retryBtn = bodyEl.querySelector('#s3-sb-retry-net');
     if (retryBtn) {
       retryBtn.onclick = () => reloadLibrary(true);
+    }
+    const cleanBtn = bodyEl.querySelector('#s3-btn-clean-empty');
+    if (cleanBtn) {
+      cleanBtn.onclick = () => cleanAllEmptyCategories();
     }
     const olderBtn = bodyEl.querySelector('#s3-btn-load-older');
     if (olderBtn) {
@@ -1832,6 +1865,146 @@
     }
   }
 
+  // 8.0. DỌN DANH MỤC TRỐNG (môn/chương không còn file nào, chỉ gỡ tên khỏi subjects.json)
+  function computeEmptyCategories() {
+    const norm = normalizeSearchText;
+    const emptyChaps = [];
+    const emptySubjs = [];
+    for (const subj of (S3_STATE.subjects?.mon_hoc || [])) {
+      const subjFiles = S3_STATE.allItems.filter(it => norm(it.mon_hoc) === norm(subj.ten));
+      if (subjFiles.length === 0) {
+        emptySubjs.push(subj.ten);
+        continue;
+      }
+      for (const ch of (subj.chuong || [])) {
+        const so = Number(ch.so) || 1;
+        if (!subjFiles.some(it => Number(it.chuong?.so) === so)) {
+          emptyChaps.push({ mon: subj.ten, so, ten: ch.ten });
+        }
+      }
+    }
+    return { emptyChaps, emptySubjs };
+  }
+
+  async function removeCategoriesFromSubjectsJson(removeSubjects, removeChapters, commitMessage) {
+    const norm = normalizeSearchText;
+    const res = await s3UpdateJsonWithRetry('subjects.json', (curr) => {
+      const data = (curr && Array.isArray(curr.mon_hoc)) ? curr : { mon_hoc: [] };
+      data.mon_hoc = data.mon_hoc.filter(sj => !removeSubjects.some(n => norm(n) === norm(sj.ten)));
+      for (const sj of data.mon_hoc) {
+        sj.chuong = (sj.chuong || []).filter(c =>
+          !removeChapters.some(r => norm(r.mon) === norm(sj.ten) && Number(r.so) === (Number(c.so) || 1)));
+      }
+      // Môn không còn chương và không có file nào thì bỏ luôn
+      data.mon_hoc = data.mon_hoc.filter(sj =>
+        (sj.chuong || []).length > 0 || S3_STATE.allItems.some(it => norm(it.mon_hoc) === norm(sj.ten)));
+      return data;
+    }, commitMessage);
+    S3_STATE.subjects = res.data;
+    await dbSet(LIB_KEYS.SUBJECTS, { sha: res.sha, data: res.data });
+  }
+
+  function resetSelectionIfRemoved(monName, chSo) {
+    const sel = S3_STATE.selectedChapter;
+    if (!sel) return;
+    const sameMon = normalizeSearchText(sel.mon_hoc) === normalizeSearchText(monName);
+    if (sameMon && (chSo == null || Number(sel.so) === chSo)) {
+      S3_STATE.selectedChapter = null;
+      if (S3_STATE.mainView === 'chapter') {
+        S3_STATE.mainView = 'none';
+        const ws = document.getElementById('s3-main-workspace');
+        if (ws) ws.style.display = 'none';
+      }
+    }
+  }
+
+  async function deleteEmptySubjectOrChapter(monName, chSo) {
+    if (!isGitHubConfigured()) {
+      alert('Cần cấu hình kết nối GitHub trong Cài đặt để xóa mục này.');
+      return;
+    }
+    try {
+      await ensureAllMonthsLoaded(); // tải đủ các tháng để đếm bài cho chính xác
+      const norm = normalizeSearchText;
+      const files = S3_STATE.allItems.filter(it =>
+        norm(it.mon_hoc) === norm(monName) && (chSo == null || Number(it.chuong?.so) === chSo));
+      if (files.length > 0) {
+        alert(`Mục này vẫn còn ${files.length} file bài tập nên chưa thể xóa. Hãy chuyển hoặc xóa các file đó trước.`);
+        renderSidebarAll();
+        return;
+      }
+      const label = chSo == null ? `môn "${monName}"` : `Chương ${chSo} của môn "${monName}"`;
+      if (!confirm(`Xóa ${label}?\nMục này đang trống (0 bài). Thao tác chỉ gỡ tên khỏi danh mục, không làm mất dữ liệu bài nào.`)) return;
+
+      updateSyncStatus('busy', 'Đang dọn danh mục...');
+      await removeCategoriesFromSubjectsJson(
+        chSo == null ? [monName] : [],
+        chSo == null ? [] : [{ mon: monName, so: chSo }],
+        `Xóa mục trống: ${label}`
+      );
+      resetSelectionIfRemoved(monName, chSo);
+      rebuildFlatItemsAndSubjects();
+      renderSidebarAll();
+      updateSyncStatus('ok', 'Đã kết nối');
+    } catch (err) {
+      updateSyncStatus('err', 'Lỗi');
+      alert('Lỗi khi xóa mục trống: ' + err.message);
+    }
+  }
+
+  async function cleanAllEmptyCategories() {
+    if (!isGitHubConfigured()) {
+      alert('Cần cấu hình kết nối GitHub trong Cài đặt để dọn danh mục.');
+      return;
+    }
+    try {
+      await ensureAllMonthsLoaded();
+      const { emptyChaps, emptySubjs } = computeEmptyCategories();
+      if (emptyChaps.length === 0 && emptySubjs.length === 0) {
+        alert('Không có mục trống nào cần dọn.');
+        renderSidebarAll();
+        return;
+      }
+      const lines = [
+        ...emptySubjs.map(n => `• Môn "${n}" (trống)`),
+        ...emptyChaps.map(c => `• ${c.mon} → Chương ${c.so}: ${c.ten || ''}`)
+      ].join('\n');
+      if (!confirm(`Sẽ gỡ các mục trống sau khỏi danh mục (không mất dữ liệu bài nào):\n${lines}\n\nTiếp tục?`)) return;
+
+      updateSyncStatus('busy', 'Đang dọn danh mục...');
+      await removeCategoriesFromSubjectsJson(emptySubjs, emptyChaps, 'Dọn các mục trống trong danh mục');
+      emptySubjs.forEach(n => resetSelectionIfRemoved(n, null));
+      emptyChaps.forEach(c => resetSelectionIfRemoved(c.mon, c.so));
+      rebuildFlatItemsAndSubjects();
+      renderSidebarAll();
+      updateSyncStatus('ok', 'Đã kết nối');
+    } catch (err) {
+      updateSyncStatus('err', 'Lỗi');
+      alert('Lỗi khi dọn danh mục: ' + err.message);
+    }
+  }
+
+  // Tự gỡ chương/môn cũ nếu vừa chuyển hoặc xóa file cuối cùng của nó (lỗi thì bỏ qua, vẫn còn nút xóa tay)
+  async function pruneIfEmptyAfterChange(monName, chSo) {
+    try {
+      await ensureAllMonthsLoaded();
+      const norm = normalizeSearchText;
+      const subjFiles = S3_STATE.allItems.filter(it => norm(it.mon_hoc) === norm(monName));
+      if (subjFiles.some(it => Number(it.chuong?.so) === chSo)) return; // chương còn bài thì giữ
+      const dropSubject = subjFiles.length === 0;
+      await removeCategoriesFromSubjectsJson(
+        dropSubject ? [monName] : [],
+        dropSubject ? [] : [{ mon: monName, so: chSo }],
+        'Tự dọn mục trống sau khi chuyển/xóa file'
+      );
+      resetSelectionIfRemoved(monName, dropSubject ? null : chSo);
+      rebuildFlatItemsAndSubjects();
+      renderSidebarAll();
+    } catch (e) {
+      /* bỏ qua */
+    }
+  }
+
   // 8.1. Sửa Hashtag & Ghi chú của một file
   function openEditTagsAndNoteModal(folderPath) {
     const item = S3_STATE.allItems.find(it => it.duong_dan === folderPath);
@@ -2007,6 +2180,8 @@
               S3_STATE.selectedChapter = { mon_hoc: newSubj, so: newSo, ten: newTen };
               renderSidebarAll();
               renderMainWorkspace();
+              // Chuyển xong: nếu chương/môn cũ không còn bài nào thì tự gỡ khỏi danh mục
+              pruneIfEmptyAfterChange(item.mon_hoc, Number(item.chuong?.so) || 1);
             } catch (err) {
               const errEl = document.getElementById('s3-modal-err');
               if (errEl) errEl.textContent = 'Lỗi: ' + err.message;
@@ -2178,6 +2353,8 @@
       renderSidebarAll();
       renderMainWorkspace();
       updateSyncStatus('ok', 'Đã kết nối');
+      // Xóa xong: nếu chương/môn không còn bài nào thì tự gỡ khỏi danh mục
+      pruneIfEmptyAfterChange(item.mon_hoc, Number(item.chuong?.so) || 1);
     } catch (err) {
       updateSyncStatus('err', 'Lỗi');
       alert('Lỗi khi xóa mục bài tập: ' + err.message);
