@@ -1966,6 +1966,17 @@
    * Đọc lại toàn bộ kết quả từ một thư mục trên repo (hoặc IndexedDB) và gọi renderResult
    * Phục vụ cho nút "Mở lại kết quả" và xuất cho Chặng 3 dùng lại.
    */
+  // Đổi blob URL thành data URL để lưu được vào IndexedDB lâu dài
+  async function blobUrlToDataUrl(blobUrl) {
+    const blob = await (await fetch(blobUrl)).blob();
+    return await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = () => reject(fr.error);
+      fr.readAsDataURL(blob);
+    });
+  }
+
   async function openResultByFolder(folderPath) {
     const cleanFolder = String(folderPath || '').replace(/\/+$/, '');
     const mountEl = document.getElementById('s2-result-mount') || document.getElementById('main-content');
@@ -1975,7 +1986,10 @@
     const hash8 = hashMatch ? hashMatch[1] : null;
     if (hash8) {
       const cached = await dbGet(`result:${hash8}`);
-      if (cached && cached.meta && cached.kienthuc && cached.baitap) {
+      const cachedFigs = (cached && cached.figureUrls) || {};
+      const hasStaleBlob = Object.values(cachedFigs).some(u => typeof u === 'string' && u.startsWith('blob:'));
+      const missingFig = !!(cached && cached.baitap && (cached.baitap.danh_sach_bai || []).some(p => p.co_hinh && !cachedFigs[p.id]));
+      if (cached && cached.meta && cached.kienthuc && cached.baitap && !hasStaleBlob && !missingFig) {
         await renderResult(mountEl, cached);
         mountEl.scrollIntoView({ behavior: 'smooth' });
         return cached;
@@ -2001,7 +2015,8 @@
     for (const prob of (baitap.danh_sach_bai || [])) {
       if (prob.co_hinh) {
         try {
-          figureUrls[prob.id] = await ghGetBlobUrl(`${cleanFolder}/hinh/${prob.id}.jpg`);
+          const blobUrl = await ghGetBlobUrl(`${cleanFolder}/hinh/${prob.id}.jpg`);
+          figureUrls[prob.id] = await blobUrlToDataUrl(blobUrl);
         } catch (e) {
           figureUrls[prob.id] = '';
         }
