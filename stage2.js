@@ -1420,6 +1420,7 @@
    */
   async function renderResult(containerEl, data) {
     if (!containerEl || !data) return;
+    containerEl.__s2Data = data; // chặng 4 dùng để biết thư mục, đề bài và hình của từng thẻ
     injectStage2Styles();
 
     const meta = data.meta || {};
@@ -1584,10 +1585,9 @@
                 <div class="s2-btn-row" style="justify-content:space-between; margin-top:12px;">
                   <button type="button" class="btn-sm s2-btn-save-prob-meta" data-prob-id="${escapeHTML(probId)}">💾 Lưu ghi chú & Hashtag</button>
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <button type="button" disabled title="Sẽ mở ở Chặng 4" style="opacity:0.6; cursor:not-allowed;">
-                      🎞️ Tạo mô hình động
+                    <button type="button" class="s2-btn-anim" data-prob-id="${escapeHTML(probId)}" title="Tạo mô hình động tương tác từ bài này (tốn 1 lượt AI)">
+                      🎞️ Mô hình động
                     </button>
-                    <span style="font-size:0.78rem; color:var(--text-muted);">(sẽ có ở chặng 4)</span>
                   </div>
                 </div>
               </div>
