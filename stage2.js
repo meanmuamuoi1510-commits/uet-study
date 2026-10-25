@@ -1811,7 +1811,9 @@
       throw new Error(`Không đọc được file ảnh "${path}" từ GitHub (HTTP ${res.status}).`);
     }
 
-    const blob = await res.blob();
+    const rawBlob = await res.blob();
+    // GitHub trả MIME "application/vnd.github.raw"; ép về ảnh JPEG để các bước sau (gửi cho AI) không bị sai loại
+    const blob = new Blob([rawBlob], { type: 'image/jpeg' });
     return URL.createObjectURL(blob);
   }
 

@@ -835,18 +835,23 @@
      */
     function normalizeImageInput(imgItem) {
       if (!imgItem) return null;
-      if (typeof imgItem === 'object' && imgItem.data) {
-        return {
-          mimeType: imgItem.mimeType || 'image/jpeg',
-          base64Data: imgItem.data.replace(/^data:[^;]+;base64,/, '')
-        };
-      }
-      const str = String(imgItem);
-      const match = str.match(/^data:([^;]+);base64,(.+)$/);
-      if (match) {
-        return { mimeType: match[1], base64Data: match[2] };
-      }
-      return { mimeType: 'image/jpeg', base64Data: str };
+      const VALID_MIME = /^image\/(jpeg|png|webp|gif)$/;
+      // Đoán loại ảnh từ phần đầu của chuỗi base64 (không tin MIME khai báo, vì GitHub có thể trả MIME lạ)
+      const sniffMime = (b64) =>
+        b64.startsWith('/9j/') ? 'image/jpeg' :
+        b64.startsWith('iVBOR') ? 'image/png' :
+        b64.startsWith('UklGR') ? 'image/webp' :
+        b64.startsWith('R0lGOD') ? 'image/gif' : null;
+      const build = (str, hint) => {
+        const s = String(str).trim();
+        const m = s.match(/^data:([^,]*?);base64,([\s\S]+)$/);
+        const b64 = m ? m[2] : s;
+        const declared = m ? m[1].split(';')[0].trim().toLowerCase() : '';
+        const mime = sniffMime(b64) || (VALID_MIME.test(declared) ? declared : (VALID_MIME.test(String(hint || '')) ? hint : 'image/jpeg'));
+        return { mimeType: mime, base64Data: b64 };
+      };
+      if (typeof imgItem === 'object' && imgItem.data) return build(imgItem.data, imgItem.mimeType);
+      return build(imgItem, 'image/jpeg');
     }
 
     /**
