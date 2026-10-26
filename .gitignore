@@ -1,0 +1,22 @@
+# Hệ điều hành & Thư mục tạm
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Trình soạn thảo & IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Tệp nhật ký & bản sao lưu cục bộ
+*.bak
+*.orig
+npm-debug.log*
+yarn-debug.log*
+
+# Bảo mật API Key cá nhân
+secrets.json
+api_key.txt
+.env

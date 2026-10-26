@@ -36,6 +36,48 @@
     paginationLimit: 30
   };
 
+  /**
+   * Khung chương trình chuẩn ngành Kỹ thuật Cơ điện tử - ĐHQGHN (VNU-UET)
+   */
+  const VNU_MECHATRONICS_CURRICULUM = [
+    {
+      ten: 'Cơ kỹ thuật & Cơ học máy',
+      chuong: [
+        { so: 1, ten: 'Tĩnh học & Cân bằng hệ lực (FBD, Phản lực liên kết)' },
+        { so: 2, ten: 'Động học điểm & Vật rắn (Chuyển động phẳng, Vận tốc góc)' },
+        { so: 3, ten: 'Cơ cấu 4 khâu bản lề & Con trượt thanh truyền' },
+        { so: 4, ten: 'Động lực học & Phương trình vi phân Lagrange' },
+        { so: 5, ten: 'Dao động cơ học (Hệ lò xo - giảm chấn, Cộng hưởng)' }
+      ]
+    },
+    {
+      ten: 'Kỹ thuật Điện tử & Mạch',
+      chuong: [
+        { so: 1, ten: 'Mạch điện RLC & Quá độ cấp 1, cấp 2' },
+        { so: 2, ten: 'Diode, Transistor BJT & MOSFET công tắc' },
+        { so: 3, ten: 'Khuếch đại thuật toán (Op-Amp) & Lọc tích cực' },
+        { so: 4, ten: 'Mạch dao động & Cầu H điều khiển động cơ' }
+      ]
+    },
+    {
+      ten: 'Lý thuyết Điều khiển tự động & MATLAB',
+      chuong: [
+        { so: 1, ten: 'Mô hình hóa toán học, Hàm truyền đạt G(s)' },
+        { so: 2, ten: 'Đáp ứng quá độ (Step response) & Ổn định Routh' },
+        { so: 3, ten: 'Quỹ đạo nghiệm số (Root Locus) & Đồ thị Bode' },
+        { so: 4, ten: 'Thiết kế bộ điều khiển PID & Không gian trạng thái' }
+      ]
+    },
+    {
+      ten: 'Cảm biến & Cơ cấu chấp hành',
+      chuong: [
+        { so: 1, ten: 'Cảm biến đo dịch chuyển, góc quay (Encoder, LVDT)' },
+        { so: 2, ten: 'Cảm biến lực, gia tốc (Strain gauge, MEMS IMU)' },
+        { so: 3, ten: 'Động cơ DC, Động cơ bước & Servo cơ điện tử' }
+      ]
+    }
+  ];
+
   function injectStage3Styles() {
     if (document.getElementById('s3-styles')) return;
     const style = document.createElement('style');
@@ -644,9 +686,9 @@
       return String(b.id || '').localeCompare(String(a.id || ''));
     });
 
-    // Đảm bảo mọi môn/chương xuất hiện trong index đều có mặt trong cây subjects
-    if (!S3_STATE.subjects || !Array.isArray(S3_STATE.subjects.mon_hoc)) {
-      S3_STATE.subjects = { mon_hoc: [] };
+    // Đảm bảo cây môn học luôn có sẵn khung chương trình chuẩn Cơ điện tử VNU
+    if (!S3_STATE.subjects || !Array.isArray(S3_STATE.subjects.mon_hoc) || S3_STATE.subjects.mon_hoc.length === 0) {
+      S3_STATE.subjects = { mon_hoc: JSON.parse(JSON.stringify(VNU_MECHATRONICS_CURRICULUM)) };
     }
     for (const item of S3_STATE.allItems) {
       const monName = item.mon_hoc || 'Chưa phân loại';
@@ -883,20 +925,12 @@
     }
 
     // Chế độ Cây Môn -> Chương
-    const subjectsList = S3_STATE.subjects?.mon_hoc || [];
-    const filteredItems = getFilteredIndexItems();
-
-    if (subjectsList.length === 0 && filteredItems.length === 0) {
-      bodyEl.innerHTML = `
-        ${offlineBannerHtml}
-        <div style="padding:14px; text-align:center; color:var(--text-muted); font-size:0.85rem;">
-          Chưa có dữ liệu môn học. Hãy nộp bài ở Chặng 2 hoặc bấm <strong>Đồng bộ</strong>.
-        </div>
-        ${unloadedCount > 0 ? `<button type="button" class="btn-sm" style="width:100%; margin-top:8px;" id="s3-btn-load-older">📂 Xem cũ hơn (${unloadedCount} tháng chưa tải)</button>` : ''}
-      `;
-      bindSidebarCommonButtons(bodyEl);
-      return;
+    let subjectsList = S3_STATE.subjects?.mon_hoc || [];
+    if (subjectsList.length === 0) {
+      S3_STATE.subjects = { mon_hoc: JSON.parse(JSON.stringify(VNU_MECHATRONICS_CURRICULUM)) };
+      subjectsList = S3_STATE.subjects.mon_hoc;
     }
+    const filteredItems = getFilteredIndexItems();
 
     const noFilterNow = !(S3_STATE.searchQuery.trim() || S3_STATE.activeHashtags.length > 0);
     const emptyChapCount = noFilterNow
@@ -1285,6 +1319,46 @@
           </div>
         </div>
       `;
+    }
+
+    if (chapterFiles.length === 0) {
+      const ch = S3_STATE.selectedChapter || {};
+      container.innerHTML = `
+        <div style="padding:28px 16px; text-align:center; background:var(--bg-panel); border:1px dashed var(--border); border-radius:var(--radius); margin-top:8px;">
+          <div style="font-size:2.2rem; margin-bottom:8px;">📝</div>
+          <div style="font-weight:700; font-size:1.05rem; margin-bottom:6px; color:var(--primary);">
+            Chưa có bài tập nào được lưu cho chương này
+          </div>
+          <p style="font-size:0.88rem; color:var(--text-muted); max-width:540px; margin:0 auto 16px auto; line-height:1.5;">
+            Bạn có thể tải ảnh hoặc file PDF đề thi / bài tập giáo trình của môn <strong>${escapeHTML(ch.mon_hoc || '')}</strong> lên Bộ Quét & Giải Đề để AI phân tích từng bước, vẽ hình và mô phỏng.
+          </p>
+          <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-primary" id="s3-btn-solve-for-chap">⚡ Quét & Giải bài tập cho chương này</button>
+            <button type="button" id="s3-btn-open-lab-for-chap">🔬 Thử nghiệm trong Phòng Thí Nghiệm Động</button>
+          </div>
+        </div>
+      `;
+      const btnSolve = container.querySelector('#s3-btn-solve-for-chap');
+      if (btnSolve) {
+        btnSolve.onclick = () => {
+          if (typeof window.switchMechaTab === 'function') {
+            window.switchMechaTab('solver');
+            const subjInp = document.getElementById('s2-inp-subject');
+            const chapInp = document.getElementById('s2-inp-chapter');
+            if (subjInp) subjInp.value = ch.mon_hoc || '';
+            if (chapInp) chapInp.value = `Chương ${ch.so || 1}: ${ch.ten || ''}`;
+          }
+        };
+      }
+      const btnLab = container.querySelector('#s3-btn-open-lab-for-chap');
+      if (btnLab) {
+        btnLab.onclick = () => {
+          if (typeof window.switchMechaTab === 'function') {
+            window.switchMechaTab('labs');
+          }
+        };
+      }
+      return;
     }
 
     container.innerHTML = html;
@@ -2705,11 +2779,31 @@
     renderMainWorkspace();
   }
 
-  // Xuất duy nhất window.MechaStage3 theo đúng yêu cầu
+  // Xuất window.MechaStage3
   window.MechaStage3 = {
     openFolder: (duong_dan) => openFolder(duong_dan),
     reload: () => reloadLibrary(true),
-    search: (query) => publicSearch(query)
+    search: (query) => publicSearch(query),
+    openLibraryView: () => {
+      const wsEl = document.getElementById('s3-main-workspace');
+      if (wsEl) {
+        wsEl.style.display = 'block';
+        if (S3_STATE.mainView === 'none') {
+          S3_STATE.mainView = 'chapter';
+          if (!S3_STATE.selectedChapter) {
+            const firstSubj = S3_STATE.subjects?.mon_hoc?.[0] || VNU_MECHATRONICS_CURRICULUM[0];
+            const firstChap = firstSubj?.chuong?.[0] || { so: 1, ten: 'Chương 1' };
+            S3_STATE.selectedChapter = {
+              mon_hoc: firstSubj.ten,
+              so: Number(firstChap.so) || 1,
+              ten: firstChap.ten
+            };
+          }
+          renderMainWorkspace();
+        }
+      }
+      renderSidebarAll();
+    }
   };
 
   if (document.readyState !== 'loading') {

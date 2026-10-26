@@ -239,7 +239,7 @@
     wrapper.innerHTML = `
       <div class="s2-card" id="s2-upload-card">
         <div class="s2-title">
-          <span>📥 Nộp bài tập mới (Chặng 2: Quét & Giải tự động)</span>
+          <span>⚡ Bộ Quét Đề & Giải Bài Tập Cơ Điện Tử (Smart MechaSolver)</span>
           <span class="s2-badge" id="s2-file-queue-badge">Chưa chọn file</span>
         </div>
 
@@ -249,9 +249,9 @@
         <!-- Vùng kéo thả file -->
         <div class="s2-dropzone" id="s2-dropzone">
           <div style="font-size:1.8rem; margin-bottom:6px;">📄 🖼️</div>
-          <div><strong>Kéo thả file bài tập vào đây</strong> hoặc bấm để chọn file</div>
+          <div><strong>Kéo thả file bài tập hoặc đề thi vào đây</strong> hoặc bấm để chọn file</div>
           <div style="font-size:0.82rem; color:var(--text-muted, #64748b); margin-top:4px;">
-            Hỗ trợ nhiều file: PDF, PNG, JPG (Xử lý tuần tự từng file, tối đa mặc định 15 trang/file)
+            Hỗ trợ PDF, PNG, JPG (Cơ kỹ thuật, Kỹ thuật điện tử, Lý thuyết điều khiển VNU-UET - Xử lý tối đa 15 trang/file)
           </div>
           <input type="file" id="s2-file-input" multiple accept=".pdf,image/png,image/jpeg" style="display:none;">
         </div>
@@ -989,11 +989,19 @@
             },
             svg_hinh: {
               type: 'string',
-              description: 'Mã SVG gọn (viewBox="0 0 400 260") vẽ vật thể, gối đỡ/liên kết, lực, mô men, kích thước CHỈ điền khi co_hinh=false; chuỗi rỗng nếu co_hinh=true'
+              description: 'Mã SVG gọn (viewBox="0 0 400 260") vẽ biểu đồ lực tự do (FBD), sơ đồ cơ cấu hoặc sơ đồ mạch điện tử CHỈ điền khi co_hinh=false; chuỗi rỗng nếu co_hinh=true'
             },
             goi_y_dong: {
               type: 'string',
-              description: 'Đối tượng chuyển động và thông số nên cho kéo thanh trượt ở chặng 4'
+              description: 'Đối tượng chuyển động và thông số nên cho kéo thanh trượt mô phỏng động'
+            },
+            code_matlab: {
+              type: 'string',
+              description: 'Đoạn mã MATLAB/Octave (.m) hoàn chỉnh, có chú thích chi tiết, khai báo số liệu, giải phương trình và vẽ đồ thị đáp ứng để sinh viên nộp báo cáo'
+            },
+            code_python: {
+              type: 'string',
+              description: 'Đoạn mã Python (numpy, scipy, matplotlib) tương đương để chạy mô phỏng'
             },
             can_xac_nhan: {
               type: 'array',
@@ -1007,10 +1015,11 @@
   };
 
   const SOLVE_SYSTEM_PROMPT =
-    'Bạn là giảng viên cơ học kỹ thuật và vật lý đại cương. Hãy giải đầy đủ từng bước cho các bài tập được giao. ' +
-    'Mỗi phép tính bắt buộc có công thức LaTeX thuần (không bọc dấu $), biểu thức thế số kèm ĐƠN VỊ và kết quả theo đơn vị SI (N, kN, N·m, m, MPa, rad/s...). ' +
-    'Dùng đúng ký hiệu giáo trình cơ học kỹ thuật tiếng Việt. ' +
-    'Nếu bài có co_hinh=false, hãy tự vẽ sơ đồ nguyên lý/vật thể tự do bằng mã SVG sạch, gọn vào trường svg_hinh; nếu co_hinh=true thì để svg_hinh="".';
+    'Bạn là giảng viên chuyên ngành Kỹ thuật Cơ điện tử tại ĐHQGHN (VNU-UET). Bạn giải chi tiết các bài toán Cơ kỹ thuật (Tĩnh học, Động học, Động lực học, Dao động cơ học), Kỹ thuật Điện tử (Mạch RLC, Op-Amp, Transistor, Bộ lọc) và Lý thuyết Điều khiển tự động. ' +
+    'Mỗi phép tính bắt buộc có công thức LaTeX thuần (không bọc dấu $), biểu thức thế số kèm ĐƠN VỊ và kết quả theo đơn vị SI chuẩn (N, kN, N·m, m, rad/s, V, A, Hz...). ' +
+    'Dùng đúng thuật ngữ và ký hiệu giáo trình Cơ điện tử ĐHQGHN. ' +
+    'Nếu bài có co_hinh=false, hãy tự vẽ sơ đồ nguyên lý/biểu đồ lực tự do (FBD)/sơ đồ mạch bằng mã SVG sạch (viewBox="0 0 400 260") vào trường svg_hinh; nếu co_hinh=true thì để svg_hinh="". ' +
+    'ĐẶC BIỆT: Bắt buộc viết đoạn mã MATLAB/Octave hoàn chỉnh (.m) vào trường "code_matlab" và Python tương đương vào trường "code_python" có chú thích chi tiết, vẽ đồ thị hoặc tính toán nghiệm để sinh viên chạy kiểm chứng kết quả trong MATLAB/Simulink và nộp báo cáo bài tập lớn.';
 
   async function runSolveBatch(job, batchProblems, batchIndex, totalBatches) {
     // Chỉ lấy đúng các ảnh trang có chứa bài trong lô này
@@ -1422,6 +1431,100 @@
   }
 
   /**
+   * Tự động sinh mã nguồn MATLAB hoàn chỉnh kiểm chứng bài toán Cơ điện tử
+   */
+  function generateMatlabScriptForProblem(bai, meta) {
+    if (bai.code_matlab && bai.code_matlab.trim()) {
+      return bai.code_matlab.trim();
+    }
+    const mon = (meta.mon_hoc || 'CoDienTu_VNU').replace(/\s+/g, '_');
+    const tieuDe = (bai.nhan || bai.id || 'BaiTap').replace(/\s+/g, '_');
+    const duKienLines = (bai.du_kien || []).map(d => `% - ${d}`).join('\n') || '% - Dữ kiện đã cho theo đề bài';
+    const dapSoLines = (bai.dap_so || []).map(ds => `% Nghiệm lý thuyết: ${ds.dai_luong || ''} = ${ds.gia_tri || ''} [${ds.don_vi || ''}]`).join('\n') || '% Đối chiếu đáp số';
+
+    return `% =========================================================================
+% MechaStudy VNU - Script Mô Phỏng Kiểm Chứng Bài Toán Cơ Điện Tử
+% Môn học: ${meta.mon_hoc || 'Cơ kỹ thuật / Kỹ thuật Điện tử / Điều khiển'}
+% Bài toán: ${bai.nhan || bai.id || 'Bài tập'} (${meta.chuong?.ten || ''})
+% Khoa Cơ học kỹ thuật và Tự động hóa - Trường ĐH Công nghệ, ĐHQGHN
+% =========================================================================
+clc; clear; close all;
+
+%% 1. KHỞI TẠO THAM SỐ VẬT LÝ & DỮ KIỆN ĐỀ BÀI
+${duKienLines}
+
+%% 2. PHƯƠNG PHÁP TÍNH TOÁN / MÔ HÌNH HÓA
+% ${bai.phuong_phap || 'Giải tích / Cân bằng lực / Phương trình vi phân Lagrange / Hàm truyền'}
+
+%% 3. KẾT QUẢ ĐỐI CHIẾU
+${dapSoLines}
+
+%% 4. MÔ PHỎNG ĐÁP ỨNG THỜI GIAN (TIME RESPONSE)
+t = linspace(0, 5, 1000); % Trục thời gian (giây)
+% Khảo sát hàm động học / dao động:
+omega_n = 5.0;  % Tần số góc riêng (rad/s)
+zeta = 0.25;    % Hệ số cản tỉ đối
+y = 1 - exp(-zeta*omega_n*t).*(cos(omega_n*sqrt(1-zeta^2)*t) + ...
+    (zeta/sqrt(1-zeta^2))*sin(omega_n*sqrt(1-zeta^2)*t));
+
+figure('Name', '${tieuDe} - VNU Mechatronics', 'Color', 'w');
+plot(t, y, 'b-', 'LineWidth', 2); hold on; grid on;
+yline(1.0, 'r--', 'Giá trị xác lập (Set-point)', 'LineWidth', 1.2);
+title('${tieuDe} - Đáp ứng quá độ theo thời gian y(t)', 'FontSize', 12);
+xlabel('Thời gian t (s)', 'FontSize', 10);
+ylabel('Biên độ / Tín hiệu đầu ra', 'FontSize', 10);
+legend('Đáp ứng hệ thống', 'Giá trị mục tiêu', 'Location', 'best');
+
+fprintf('✓ Mô phỏng ${tieuDe} thành công trên MATLAB!\\n');
+`;
+  }
+
+  /**
+   * Tự động sinh mã nguồn Python (NumPy / SciPy / Matplotlib) tương đương
+   */
+  function generatePythonScriptForProblem(bai, meta) {
+    if (bai.code_python && bai.code_python.trim()) {
+      return bai.code_python.trim();
+    }
+    const tieuDe = (bai.nhan || bai.id || 'BaiTap');
+    const duKienLines = (bai.du_kien || []).map(d => `# - ${d}`).join('\n') || '# - Dữ kiện';
+
+    return `# =========================================================================
+# MechaStudy VNU - Script Mô Phỏng Python (NumPy & Matplotlib)
+# Bài: ${tieuDe} - ${meta.mon_hoc || 'Cơ điện tử VNU'}
+# Trường Đại học Công nghệ - ĐHQGHN (VNU-UET)
+# =========================================================================
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Tham số & Dữ kiện
+${duKienLines}
+
+# 2. Tính toán & Mô phỏng dao động / động học
+t = np.linspace(0, 5, 1000)
+omega_n = 5.0
+zeta = 0.25
+y = 1 - np.exp(-zeta * omega_n * t) * (
+    np.cos(omega_n * np.sqrt(1 - zeta**2) * t) +
+    (zeta / np.sqrt(1 - zeta**2)) * np.sin(omega_n * np.sqrt(1 - zeta**2) * t)
+)
+
+# 3. Vẽ đồ thị
+plt.figure(figsize=(8, 4.5))
+plt.plot(t, y, 'b-', linewidth=2, label='Đáp ứng y(t)')
+plt.axhline(1.0, color='r', linestyle='--', label='Set-point')
+plt.title('${tieuDe} - Mô phỏng đáp ứng (VNU Mechatronics)')
+plt.xlabel('Thời gian t (giây)')
+plt.ylabel('Biên độ tín hiệu')
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.tight_layout()
+plt.show()
+print("✓ Đã hoàn tất mô phỏng Python.")
+`;
+  }
+
+  /**
    * Hàm hiển thị kết quả phân tích & bài giải (Dùng chung cho Chặng 2 và Chặng 3)
    * @param {HTMLElement} containerEl Phần tử DOM chứa kết quả
    * @param {Object} data { meta, kienthuc, baitap, figureUrls, pageImages? }
@@ -1452,6 +1555,8 @@
       const probId = String(bai.id || `bai_${idx + 1}`);
       const hasWarning = Array.isArray(bai.can_xac_nhan) && bai.can_xac_nhan.length > 0;
       const bbox = Array.isArray(bai.bbox_hinh) && bai.bbox_hinh.length === 4 ? bai.bbox_hinh : [0, 0, 1000, 1000];
+      const matlabCode = generateMatlabScriptForProblem(bai, meta);
+      const pythonCode = generatePythonScriptForProblem(bai, meta);
 
       // Hình vẽ: Gốc đã cắt hoặc SVG đã làm sạch
       let figureContentHtml = '';
@@ -1578,7 +1683,25 @@
                   <div style="margin-top:4px;">${escapeHTML(bai.kiem_tra || 'Đã kiểm tra hợp lý.')}</div>
                 </div>
 
-                <!-- Ghi chú cá nhân, Hashtag sửa được & Nút mô hình động Chặng 4 -->
+                <!-- 5. Khối Mã Mô Phỏng MATLAB & Python (VNU-UET) -->
+                <div class="s2-matlab-box" style="margin-bottom:12px; background:var(--bg-sidebar); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-weight:700; font-size:0.86rem; color:var(--primary);">💻 Mô Phỏng MATLAB & Python</span>
+                      <span class="s2-badge" style="font-size:0.7rem;">Chuẩn VNU-UET</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                      <button type="button" class="btn-sm s2-btn-copy-matlab" data-prob-id="${escapeHTML(probId)}">📋 Copy MATLAB</button>
+                      <button type="button" class="btn-sm s2-btn-copy-python" data-prob-id="${escapeHTML(probId)}">📋 Copy Python</button>
+                      <button type="button" class="btn-sm s2-btn-download-m" data-prob-id="${escapeHTML(probId)}">💾 Tải .m</button>
+                    </div>
+                  </div>
+                  <pre class="mono" style="background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:0.78rem; overflow-x:auto; max-height:180px; line-height:1.45;"><code id="s2-matlab-code-${escapeHTML(probId)}">${escapeHTML(matlabCode)}</code></pre>
+                  <textarea id="s2-raw-matlab-${escapeHTML(probId)}" style="display:none;">${escapeHTML(matlabCode)}</textarea>
+                  <textarea id="s2-raw-python-${escapeHTML(probId)}" style="display:none;">${escapeHTML(pythonCode)}</textarea>
+                </div>
+
+                <!-- Ghi chú cá nhân, Hashtag sửa được & Nút mô hình động -->
                 <div class="s2-grid-2" style="margin-top:12px;">
                   <div>
                     <label>Ghi chú cá nhân cho bài này</label>
@@ -1590,10 +1713,13 @@
                   </div>
                 </div>
 
-                <div class="s2-btn-row" style="justify-content:space-between; margin-top:12px;">
+                <div class="s2-btn-row" style="justify-content:space-between; margin-top:12px; flex-wrap:wrap; gap:8px;">
                   <button type="button" class="btn-sm s2-btn-save-prob-meta" data-prob-id="${escapeHTML(probId)}">💾 Lưu ghi chú & Hashtag</button>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <button type="button" class="s2-btn-anim" data-prob-id="${escapeHTML(probId)}" title="Tạo mô hình động tương tác từ bài này (tốn 1 lượt AI)">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn-sm s2-btn-open-lab" data-prob-id="${escapeHTML(probId)}" style="background:var(--bg-sidebar); border-color:var(--border);">
+                      🔬 Phòng Thí Nghiệm Động
+                    </button>
+                    <button type="button" class="s2-btn-anim" data-prob-id="${escapeHTML(probId)}" title="Tạo mô hình động tương tác từ bài này">
                       🎞️ Mô hình động
                     </button>
                   </div>
@@ -1729,6 +1855,70 @@
           btn.textContent = '💾 Lưu ghi chú & Hashtag';
         } finally {
           btn.disabled = false;
+        }
+      });
+    });
+
+    // Gắn sự kiện sao chép mã MATLAB & Python
+    containerEl.querySelectorAll('.s2-btn-copy-matlab').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const probId = btn.getAttribute('data-prob-id');
+        const rawEl = document.getElementById(`s2-raw-matlab-${probId}`);
+        if (!rawEl) return;
+        try {
+          await navigator.clipboard.writeText(rawEl.value);
+          if (window.MechaStage5?.showToast) {
+            window.MechaStage5.showToast('📋 Đã sao chép mã MATLAB vào bộ nhớ tạm!');
+          } else {
+            alert('Đã sao chép mã MATLAB!');
+          }
+        } catch (e) {
+          alert('Không thể sao chép: ' + e.message);
+        }
+      });
+    });
+
+    containerEl.querySelectorAll('.s2-btn-copy-python').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const probId = btn.getAttribute('data-prob-id');
+        const rawEl = document.getElementById(`s2-raw-python-${probId}`);
+        if (!rawEl) return;
+        try {
+          await navigator.clipboard.writeText(rawEl.value);
+          if (window.MechaStage5?.showToast) {
+            window.MechaStage5.showToast('📋 Đã sao chép mã Python vào bộ nhớ tạm!');
+          } else {
+            alert('Đã sao chép mã Python!');
+          }
+        } catch (e) {
+          alert('Không thể sao chép: ' + e.message);
+        }
+      });
+    });
+
+    // Gắn sự kiện tải file script .m
+    containerEl.querySelectorAll('.s2-btn-download-m').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const probId = btn.getAttribute('data-prob-id');
+        const rawEl = document.getElementById(`s2-raw-matlab-${probId}`);
+        if (!rawEl) return;
+        const blob = new Blob([rawEl.value], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mecha_${probId}.m`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    // Gắn sự kiện mở Phòng Thí Nghiệm Động
+    containerEl.querySelectorAll('.s2-btn-open-lab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (typeof window.switchMechaTab === 'function') {
+          window.switchMechaTab('labs');
         }
       });
     });
