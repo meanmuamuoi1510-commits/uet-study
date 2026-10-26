@@ -1386,6 +1386,14 @@
         const rawLatex = node.getAttribute('data-latex') || '';
         const displayMode = node.getAttribute('data-display') === 'true';
         if (!rawLatex.trim()) return;
+
+        // Nếu chuỗi chứa tiếng Việt có dấu và không nằm trong \text{}, hiển thị văn bản thường an toàn
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(rawLatex);
+        if (hasVietnamese && !rawLatex.includes('\\text{')) {
+          node.textContent = rawLatex;
+          return;
+        }
+
         try {
           window.katex.render(rawLatex, node, {
             throwOnError: false,
