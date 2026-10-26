@@ -182,49 +182,6 @@
     .s2-collapse-header { transition: background .15s; }
     .s2-collapse-header:hover { background: color-mix(in srgb, var(--primary) 7%, var(--bg-sidebar)); }
 
-    /* Nâng cấp giao diện bài tập Vật Lý & Công thức KaTeX */
-    .s2-prob-layout {
-      display: grid;
-      grid-template-columns: minmax(280px, 380px) 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-    @media (max-width: 860px) {
-      .s2-prob-layout { grid-template-columns: 1fr; }
-    }
-    .s2-fig-box {
-      position: sticky;
-      top: 14px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 6px 18px -8px rgba(0,0,0,.12);
-      padding: 12px;
-    }
-    .s2-step-item {
-      border-left: 4px solid var(--primary);
-      background: color-mix(in srgb, var(--primary) 4%, var(--bg-panel));
-      border-radius: 0 12px 12px 0;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-      border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-      border-right: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-      transition: transform .15s, border-color .15s;
-    }
-    .s2-step-item:hover {
-      border-left-color: var(--primary-hover);
-      background: color-mix(in srgb, var(--primary) 7%, var(--bg-panel));
-    }
-    .s2-math-block {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin: 8px 0;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,.03);
-    }
-
     /* Hộp thoại */
     @keyframes s5-pop { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
     .modal-backdrop, .s3-modal-backdrop, .s4-modal-backdrop { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }

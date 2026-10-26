@@ -875,41 +875,22 @@ Tiện ích có sẵn: Sim.G = 9.81; Sim.rk4(f, yArr, t, dt) giải vi phân b�
       return (Number(deg) * Math.PI) / 180;
     },
     rk4: function (f, y, t, dt) {
-      // Hỗ trợ cả Array lẫn Object trạng thái (tránh lỗi khi AI truyền {x, v, theta})
-      var isObj = !Array.isArray(y) && typeof y === 'object' && y !== null;
-      var keys = isObj ? Object.keys(y) : null;
-      var yArr = isObj ? keys.map(function(k) { return Number(y[k]) || 0; }) : y;
-
-      var n = yArr.length;
-      var wrapF = isObj ? function(curT, arr) {
-        var tempObj = {};
-        for (var ki = 0; ki < n; ki++) tempObj[keys[ki]] = arr[ki];
-        var dObj = f(curT, tempObj);
-        return keys.map(function(k) { return Number(dObj[k]) || 0; });
-      } : f;
-
-      var k1 = wrapF(t, yArr);
+      var n = y.length;
+      var k1 = f(t, y);
       var y2 = new Array(n);
-      for (var i = 0; i < n; i++) y2[i] = yArr[i] + 0.5 * dt * k1[i];
-      var k2 = wrapF(t + 0.5 * dt, y2);
+      for (var i = 0; i < n; i++) y2[i] = y[i] + 0.5 * dt * k1[i];
+      var k2 = f(t + 0.5 * dt, y2);
       var y3 = new Array(n);
-      for (var j = 0; j < n; j++) y3[j] = yArr[j] + 0.5 * dt * k2[j];
-      var k3 = wrapF(t + 0.5 * dt, y3);
+      for (var j = 0; j < n; j++) y3[j] = y[j] + 0.5 * dt * k2[j];
+      var k3 = f(t + 0.5 * dt, y3);
       var y4 = new Array(n);
-      for (var k = 0; k < n; k++) y4[k] = yArr[k] + dt * k3[k];
-      var k4 = wrapF(t + dt, y4);
-
-      var nextArr = new Array(n);
+      for (var k = 0; k < n; k++) y4[k] = y[k] + dt * k3[k];
+      var k4 = f(t + dt, y4);
+      var next = new Array(n);
       for (var m = 0; m < n; m++) {
-        nextArr[m] = yArr[m] + (dt / 6) * (k1[m] + 2 * k2[m] + 2 * k3[m] + k4[m]);
+        next[m] = y[m] + (dt / 6) * (k1[m] + 2 * k2[m] + 2 * k3[m] + k4[m]);
       }
-
-      if (isObj) {
-        var outObj = {};
-        for (var oi = 0; oi < n; oi++) outObj[keys[oi]] = nextArr[oi];
-        return outObj;
-      }
-      return nextArr;
+      return next;
     }
   };
 

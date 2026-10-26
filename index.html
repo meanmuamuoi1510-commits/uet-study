@@ -3,18 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MechaStudy VNU - Hệ thống Học tập & Mô phỏng Cơ Điện Tử</title>
-  
-  <!-- Phông chữ Google Fonts: Be Vietnam Pro (chuẩn tiếng Việt) & JetBrains Mono (mã nguồn & công thức) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Nạp sẵn KaTeX 0.16.9 và Auto-render cho công thức toán học sắc nét -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-  
+  <title>MechaStudy - Học Tập Cơ Điện Tử (Chặng 1)</title>
   <style>
     :root {
       --bg-main: #f8fafc;
@@ -49,18 +38,13 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-main);
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-    }
-    code, pre, .mono {
-      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
     }
 
     /* Thanh Header & Trạng thái */
@@ -81,88 +65,9 @@
       gap: 10px;
     }
     .brand {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      letter-spacing: -0.2px;
-    }
-    .brand-tag {
-      font-size: 0.68rem;
       font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: color-mix(in srgb, var(--primary) 15%, transparent);
+      font-size: 1.1rem;
       color: var(--primary);
-      border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .brand-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-left: 2px;
-    }
-    @media (max-width: 1100px) {
-      .brand-sub { display: none; }
-    }
-
-    /* Thanh điều hướng Tab chế độ làm việc */
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: var(--bg-sidebar);
-      padding: 3px 5px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-    }
-    .nav-tab-btn {
-      padding: 5px 12px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.18s ease;
-      white-space: nowrap;
-    }
-    .nav-tab-btn:hover {
-      color: var(--text-main);
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
-    }
-    .nav-tab-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    }
-    @media (max-width: 900px) {
-      .header-nav {
-        order: 3;
-        width: 100%;
-        overflow-x: auto;
-        padding: 4px;
-        margin-top: 4px;
-      }
-      header {
-        height: auto;
-        flex-wrap: wrap;
-        padding: 8px 12px;
-        gap: 8px;
-      }
-      .nav-tab-btn {
-        padding: 4px 8px;
-        font-size: 0.76rem;
-      }
     }
     .status-pill {
       font-size: 0.82rem;
@@ -355,11 +260,11 @@
     @media (max-width: 768px) {
       .mobile-menu-btn { display: inline-block; }
       aside#sidebar {
-        position: fixed;
-        top: 56px;
+        position: absolute;
+        top: 0;
         bottom: 0;
         left: 0;
-        z-index: 99;
+        z-index: 15;
         transform: translateX(-100%);
         box-shadow: var(--shadow);
       }
@@ -374,21 +279,8 @@
   <header>
     <div class="header-left">
       <button class="mobile-menu-btn" id="btn-toggle-sidebar" title="Mở/Đóng thư viện">☰</button>
-      <div class="brand">
-        <span>⚙️ MechaStudy</span>
-        <span class="brand-tag">VNU</span>
-        <span class="brand-sub">Cơ Điện Tử</span>
-      </div>
+      <span class="brand">⚙️ MechaStudy</span>
     </div>
-
-    <!-- Thanh điều hướng Chế độ làm việc -->
-    <nav class="header-nav" id="main-header-nav">
-      <button type="button" class="nav-tab-btn active" id="btn-nav-solver" data-tab="solver">⚡ Giải bài & OCR</button>
-      <button type="button" class="nav-tab-btn" id="btn-nav-library" data-tab="library">📚 Thư viện Môn học</button>
-      <button type="button" class="nav-tab-btn" id="btn-nav-labs" data-tab="labs">🔬 Phòng Thí nghiệm Ảo</button>
-      <button type="button" class="nav-tab-btn" id="btn-nav-matlab" data-tab="matlab">💻 MATLAB & Python</button>
-    </nav>
-
     <div class="header-right">
       <!-- Trạng thái chờ hạn mức / Rate limit -->
       <div class="status-pill" id="rl-wait-banner" style="display:none; color:var(--warning); border-color:var(--warning);">
@@ -415,20 +307,42 @@
   <!-- Thân ứng dụng -->
   <div class="app-body">
     <aside id="sidebar">
-      <div id="sidebar-placeholder" style="padding:16px; color:var(--text-muted); font-size:0.85rem;">
+      <div>
         <div style="font-size:2rem; margin-bottom:8px;">📚</div>
-        <div>Đang nạp Thư viện môn học VNU...</div>
+        <div><strong>Thư viện (sẽ làm ở chặng 3)</strong></div>
       </div>
     </aside>
 
     <main id="main-content">
-      <p id="idb-warning" style="color:var(--danger); font-weight:600; display:none;"></p>
-      
-      <!-- Vùng hiển thị Phòng Thí Nghiệm Động Học Ảo (MechaLabs) -->
-      <div id="mecha-labs-workspace" style="display:none;"></div>
+      <div class="card">
+        <h2>Khung Nền Tảng - Chặng 1 Đã Sẵn Sàng</h2>
+        <p>Hệ thống lõi dành cho sinh viên Cơ điện tử (Cơ học, Vật lý) đã được khởi tạo. Các module đã nạp vào bộ nhớ:</p>
+        <ul style="margin: 10px 0 10px 20px; font-size:0.9rem; line-height:1.6;">
+          <li><strong>Cấu hình & Bảo mật:</strong> Lưu trữ độc lập trong <code>localStorage</code>, tự động escape dữ liệu đầu ra.</li>
+          <li><strong>Adapter Đa Mô Hình (`callLLM`):</strong> Hỗ trợ Google Gemini, Anthropic Claude, OpenAI và OpenAI-Compatible.</li>
+          <li><strong>Điều tiết lượt gọi (Rate Limiter):</strong> Hàng đợi cửa sổ trượt 60 giây, tự động thử lại khi gặp lỗi 429 hoặc JSON bị hỏng.</li>
+          <li><strong>Lưu trữ GitHub REST API & IndexedDB Cache:</strong> Xử lý UTF-8 tiếng Việt hoàn chỉnh, phát hiện xung đột SHA.</li>
+        </ul>
+        <p id="idb-warning" style="color:var(--danger); font-weight:600; display:none;"></p>
+      </div>
 
-      <!-- Vùng hiển thị MATLAB & Python Studio -->
-      <div id="mecha-matlab-workspace" style="display:none;"></div>
+      <!-- Khu vực thử nghiệm nhanh Chặng 1 -->
+      <div class="card">
+        <h2>Bảng Kiểm Tra Nhanh Hạ Tầng (Chặng 1)</h2>
+        <p style="margin-bottom:12px;">Sử dụng hộp <strong>⚙ Cài đặt</strong> ở góc phải trên để nhập API Key / GitHub Token và kiểm tra kết nối trực tiếp, hoặc thử nghiệm nhanh hợp đồng đường dẫn dưới đây:</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày học (YYYY-MM-DD)</label>
+            <input type="text" id="test-date" value="2026-10-22">
+          </div>
+          <div class="form-group">
+            <label>Mã băm phiên (hash8)</label>
+            <input type="text" id="test-hash" value="a1b2c3d4">
+          </div>
+        </div>
+        <button id="btn-test-paths">Tạo đường dẫn mẫu (buildPaths)</button>
+        <div class="log-box" id="main-log-box">Sẵn sàng. Hãy mở Cài đặt để cấu hình API Key và GitHub Token.</div>
+      </div>
     </main>
   </div>
 
@@ -523,22 +437,13 @@
           </div>
         </div>
 
-        <!-- Khu vực hiển thị kết quả kiểm tra & công cụ kỹ thuật -->
-        <div class="section-title">4. Kiểm tra Kết nối & Công cụ Kỹ thuật</div>
+        <!-- Khu vực hiển thị kết quả kiểm tra -->
+        <div class="section-title">4. Kiểm tra Kết nối</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
           <button type="button" id="btn-test-ai">⚡ Kiểm tra kết nối AI</button>
           <button type="button" id="btn-test-gh">🐙 Kiểm tra kết nối GitHub (_ping.json)</button>
         </div>
-        <div style="padding:10px; background:var(--bg-sidebar); border-radius:var(--radius); border:1px solid var(--border); margin-bottom:8px;">
-          <div style="font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Thử nghiệm đường dẫn repo (buildPaths):</div>
-          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-            <input type="text" id="test-date" value="2026-10-22" placeholder="YYYY-MM-DD" style="max-width:140px; font-size:0.82rem; padding:4px 8px;">
-            <input type="text" id="test-hash" value="a1b2c3d4" placeholder="hash8" style="max-width:110px; font-size:0.82rem; padding:4px 8px;">
-            <button type="button" class="btn-sm" id="btn-test-paths">Kiểm tra hợp đồng</button>
-          </div>
-        </div>
         <div class="log-box" id="settings-test-log">Chưa chạy kiểm tra.</div>
-        <div class="log-box" id="main-log-box" style="display:none;"></div>
       </div>
 
       <div class="modal-footer">
@@ -1930,92 +1835,30 @@
         });
       });
 
-      // Gắn sự kiện chuyển tab chế độ làm việc
-      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tab = btn.getAttribute('data-tab');
-          if (tab) switchMechaTab(tab);
-        });
+      // Nút kiểm tra hàm buildPaths ở màn hình chính
+      document.getElementById('btn-test-paths').addEventListener('click', () => {
+        const logEl = document.getElementById('main-log-box');
+        try {
+          const d = document.getElementById('test-date').value;
+          const h = document.getElementById('test-hash').value;
+          const paths = buildPaths(d, h);
+          const demoOutput = {
+            subjects: paths.subjects,
+            monthIndex: paths.monthIndex,
+            meta: paths.meta,
+            kienthuc: paths.kienthuc,
+            baitap: paths.baitap,
+            hinh_mau: paths.hinh('bai_01'),
+            anim_mau: paths.anim('bai_01')
+          };
+          logEl.innerHTML = escapeHTML(JSON.stringify(demoOutput, null, 2));
+        } catch (err) {
+          logEl.innerHTML = escapeHTML('Lỗi: ' + err.message);
+        }
       });
-
-      // Nút kiểm tra hàm buildPaths trong Hộp Cài đặt
-      const btnTestPaths = document.getElementById('btn-test-paths');
-      if (btnTestPaths) {
-        btnTestPaths.addEventListener('click', () => {
-          const logEl = document.getElementById('settings-test-log') || document.getElementById('main-log-box');
-          try {
-            const d = document.getElementById('test-date').value;
-            const h = document.getElementById('test-hash').value;
-            const paths = buildPaths(d, h);
-            const demoOutput = {
-              subjects: paths.subjects,
-              monthIndex: paths.monthIndex,
-              meta: paths.meta,
-              kienthuc: paths.kienthuc,
-              baitap: paths.baitap,
-              hinh_mau: paths.hinh('bai_01'),
-              anim_mau: paths.anim('bai_01')
-            };
-            if (logEl) logEl.innerHTML = escapeHTML(JSON.stringify(demoOutput, null, 2));
-          } catch (err) {
-            if (logEl) logEl.innerHTML = escapeHTML('Lỗi: ' + err.message);
-          }
-        });
-      }
     }
 
-    /**
-     * Chuyển đổi giữa các chế độ làm việc chính
-     * @param {'solver'|'library'|'labs'|'matlab'} tabName 
-     */
-    function switchMechaTab(tabName) {
-      const solverEl = document.getElementById('s2-root-container');
-      const libraryWsEl = document.getElementById('s3-main-workspace');
-      const labsWsEl = document.getElementById('mecha-labs-workspace');
-      const matlabWsEl = document.getElementById('mecha-matlab-workspace');
-      const sidebarEl = document.getElementById('sidebar');
-
-      // Cập nhật trạng thái nút thanh điều hướng
-      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
-      });
-
-      // Ẩn tất cả các khu vực làm việc
-      if (solverEl) solverEl.style.display = 'none';
-      if (libraryWsEl) libraryWsEl.style.display = 'none';
-      if (labsWsEl) labsWsEl.style.display = 'none';
-      if (matlabWsEl) matlabWsEl.style.display = 'none';
-
-      if (tabName === 'solver') {
-        if (solverEl) solverEl.style.display = 'block';
-        if (sidebarEl && window.innerWidth < 960) sidebarEl.classList.remove('open');
-      } else if (tabName === 'library') {
-        if (libraryWsEl) libraryWsEl.style.display = 'block';
-        if (sidebarEl) sidebarEl.classList.add('open');
-        if (window.MechaStage3 && typeof window.MechaStage3.openLibraryView === 'function') {
-          window.MechaStage3.openLibraryView();
-        }
-      } else if (tabName === 'labs') {
-        if (labsWsEl) {
-          labsWsEl.style.display = 'block';
-          if (window.MechaLabs && typeof window.MechaLabs.initWorkspace === 'function') {
-            window.MechaLabs.initWorkspace();
-          }
-        }
-        if (sidebarEl && window.innerWidth < 960) sidebarEl.classList.remove('open');
-      } else if (tabName === 'matlab') {
-        if (matlabWsEl) {
-          matlabWsEl.style.display = 'block';
-          if (window.MechaLabs && typeof window.MechaLabs.initMatlabStudio === 'function') {
-            window.MechaLabs.initMatlabStudio();
-          }
-        }
-        if (sidebarEl && window.innerWidth < 960) sidebarEl.classList.remove('open');
-      }
-    }
-    window.switchMechaTab = switchMechaTab;
-
-    // Xuất các hàm công khai lên đối tượng window để các module sử dụng trực tiếp
+    // Xuất các hàm công khai lên đối tượng window để Chặng 2, 3, 4 sử dụng trực tiếp
     window.callLLM = callLLM;
     window.ghGetFile = ghGetFile;
     window.ghPutFile = ghPutFile;
@@ -2035,7 +1878,6 @@
   <script src="stage2.js"></script>
   <script src="stage3.js"></script>
   <script src="stage4.js"></script>
-  <script src="mecha-labs.js"></script>
   <script src="stage5.js"></script>
 </body>
 </html>
